@@ -1,112 +1,229 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Users, Receipt, Calculator, Wallet, CreditCard } from 'lucide-react';
-
-const salesData = [
-  { month: 'Jan', amount: 65000 },
-  { month: 'Feb', amount: 59000 },
-  { month: 'Mar', amount: 80000 },
-  { month: 'Apr', amount: 81000 },
-  { month: 'May', amount: 56000 },
-  { month: 'Jun', amount: 55000 },
-];
-
-const pieData = [
-  { name: 'GST Returns', value: 35, color: '#3B82F6' },
-  { name: 'ITR Filing', value: 25, color: '#F97316' },
-  { name: 'TDS Returns', value: 20, color: '#10B981' },
-  { name: 'Others', value: 20, color: '#8B5CF6' },
-];
+import { apiService, type DashboardData } from '../services/api';
+import { toast } from '../utils/toast';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  PieChart, Pie, Cell
+} from 'recharts';
+import { 
+  TrendingUp, TrendingDown, DollarSign, Users, Receipt, Calculator, 
+  Wallet, CreditCard, Building2, Package, RefreshCw,
+  ArrowUpRight, ArrowDownRight, Minus
+} from 'lucide-react';
+import { LoadingSpinner } from '../components/SkeletonLoader';
 
 export default function Dashboard() {
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getDashboardData();
+      if (response.success) {
+        setDashboardData(response.data);
+      } else {
+        toast.error('Failed to fetch dashboard data', '❌ Fetch Error');
+      }
+    } catch (error: any) {
+      console.error('Error fetching dashboard data:', error);
+      toast.error('Failed to fetch dashboard data. Please try again.', '❌ Network Error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  // Get icon component based on icon name
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'revenue':
+        return <DollarSign className="text-blue-600" size={24} />;
+      case 'clients':
+        return <Users className="text-orange-600" size={24} />;
+      case 'companies':
+        return <Building2 className="text-green-600" size={24} />;
+      case 'balance':
+        return <Wallet className="text-purple-600" size={24} />;
+      default:
+        return <DollarSign className="text-blue-600" size={24} />;
+    }
+  };
+
+  // Get trend icon
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case 'up':
+        return <TrendingUp className="text-green-500" size={16} />;
+      case 'down':
+        return <TrendingDown className="text-red-500" size={16} />;
+      default:
+        return <Minus className="text-gray-400" size={16} />;
+    }
+  };
+
+  // Get trend color
+  const getTrendColor = (trend: string) => {
+    switch (trend) {
+      case 'up':
+        return 'text-green-600';
+      case 'down':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  // Prepare chart data
+  const revenueChartData = dashboardData?.revenueTrend.map(item => ({
+    month: item.month.split(' ')[0],
+    revenue: item.revenue,
+    subscriptions: item.subscriptions
+  })) || [];
+
+  const serviceDistributionData = dashboardData?.serviceDistribution.map((item, index) => {
+    const colors = ['#3B82F6', '#F97316', '#10B981', '#8B5CF6', '#EC4899', '#14B8A6'];
+    return {
+      name: item.name,
+      value: parseFloat(item.percentage),
+      count: item.count,
+      color: colors[index % colors.length]
+    };
+  }) || [];
+
+  if (loading) {
+    return (
+      <Layout title="Dashboard">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <LoadingSpinner size="lg" />
+            <p className="mt-4 text-gray-600">Loading dashboard data...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!dashboardData) {
+    return (
+      <Layout title="Dashboard">
+        <div className="text-center py-12">
+          <p className="text-gray-600">Failed to load dashboard data</p>
+          <button
+            onClick={fetchDashboardData}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout title="Dashboard">
       <div className="space-y-6">
-        {/* Key Metrics */}
+        {/* Header with Refresh */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+            <p className="text-gray-600">Welcome back! Here's what's happening today.</p>
+          </div>
+          <button
+            onClick={fetchDashboardData}
+            disabled={loading}
+            className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`${loading ? 'animate-spin' : ''}`} size={20} />
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">₹4,86,000</p>
-                <div className="flex items-center mt-2 text-sm">
-                  <TrendingUp className="text-green-500 mr-1" size={16} />
-                  <span className="text-green-600">+12.5%</span>
-                  <span className="text-gray-500 ml-1">from last month</span>
+          {dashboardData.kpis.map((kpi, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 mb-1">{kpi.title}</p>
+                  <p className="text-2xl font-bold text-gray-900 mb-2">{kpi.value}</p>
+                  <div className="flex items-center text-sm">
+                    {getTrendIcon(kpi.trend)}
+                    <span className={`ml-1 ${getTrendColor(kpi.trend)}`}>
+                      {kpi.change !== '0' && kpi.change !== '0.0' ? `${kpi.change}%` : 'No change'}
+                    </span>
+                    <span className="text-gray-500 ml-1">from last period</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-full">
+                  {getIcon(kpi.icon)}
                 </div>
               </div>
-              <div className="p-3 bg-blue-50 rounded-full">
-                <DollarSign className="text-blue-600" size={24} />
+            </div>
+          ))}
+        </div>
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm">Total Revenue</p>
+                <p className="text-2xl font-bold">₹{dashboardData.summary.totalRevenue.toLocaleString()}</p>
+                <p className="text-blue-200 text-xs mt-1">Active: ₹{dashboardData.summary.activeRevenue.toLocaleString()}</p>
               </div>
+              <DollarSign size={32} className="text-blue-200" />
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Active Clients</p>
-                <p className="text-2xl font-bold text-gray-900">1,248</p>
-                <div className="flex items-center mt-2 text-sm">
-                  <TrendingUp className="text-green-500 mr-1" size={16} />
-                  <span className="text-green-600">+5.2%</span>
-                  <span className="text-gray-500 ml-1">new this month</span>
-                </div>
+                <p className="text-green-100 text-sm">Total Balance</p>
+                <p className="text-2xl font-bold">₹{dashboardData.summary.totalBalance.toLocaleString()}</p>
+                <p className="text-green-200 text-xs mt-1">System Balance</p>
               </div>
-              <div className="p-3 bg-orange-50 rounded-full">
-                <Users className="text-orange-600" size={24} />
-              </div>
+              <Wallet size={32} className="text-green-200" />
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Returns Filed</p>
-                <p className="text-2xl font-bold text-gray-900">856</p>
-                <div className="flex items-center mt-2 text-sm">
-                  <TrendingDown className="text-red-500 mr-1" size={16} />
-                  <span className="text-red-600">-2.1%</span>
-                  <span className="text-gray-500 ml-1">from last month</span>
-                </div>
+                <p className="text-orange-100 text-sm">Returns Filed</p>
+                <p className="text-2xl font-bold">{dashboardData.summary.returnsFiled.toLocaleString()}</p>
+                <p className="text-orange-200 text-xs mt-1">Total returns processed</p>
               </div>
-              <div className="p-3 bg-green-50 rounded-full">
-                <Receipt className="text-green-600" size={24} />
-              </div>
+              <Receipt size={32} className="text-orange-200" />
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Tax Saved</p>
-                <p className="text-2xl font-bold text-gray-900">₹2,84,500</p>
-                <div className="flex items-center mt-2 text-sm">
-                  <TrendingUp className="text-green-500 mr-1" size={16} />
-                  <span className="text-green-600">+18.3%</span>
-                  <span className="text-gray-500 ml-1">for clients</span>
-                </div>
+                <p className="text-purple-100 text-sm">Tax Saved</p>
+                <p className="text-2xl font-bold">₹{dashboardData.summary.taxSaved.toLocaleString()}</p>
+                <p className="text-purple-200 text-xs mt-1">For all clients</p>
               </div>
-              <div className="p-3 bg-purple-50 rounded-full">
-                <Calculator className="text-purple-600" size={24} />
-              </div>
+              <Calculator size={32} className="text-purple-200" />
             </div>
           </div>
         </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Revenue Chart */}
+          {/* Revenue Trend Chart */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Revenue Trend</h3>
-              <select className="text-sm border border-gray-300 rounded-lg px-3 py-2">
-                <option>Last 6 months</option>
-                <option>Last year</option>
-              </select>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={salesData}>
+              <BarChart data={revenueChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="month" stroke="#6b7280" />
                 <YAxis stroke="#6b7280" />
@@ -119,7 +236,7 @@ export default function Dashboard() {
                   }}
                   formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Revenue']}
                 />
-                <Bar dataKey="amount" fill="url(#blueGradient)" radius={4} />
+                <Bar dataKey="revenue" fill="url(#blueGradient)" radius={4} />
                 <defs>
                   <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#3B82F6" />
@@ -137,15 +254,16 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={pieData}
+                    data={serviceDistributionData}
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
                     dataKey="value"
                     strokeWidth={2}
                     stroke="#fff"
+                    label={({ name, value }) => `${name}: ${value}%`}
                   >
-                    {pieData.map((entry, index) => (
+                    {serviceDistributionData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -154,113 +272,285 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-4">
-              {pieData.map((item, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm text-gray-600">{item.name}</span>
+              {serviceDistributionData.map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-sm text-gray-600">{item.name}</span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">{item.count}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Financial Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100">Cash Balance</p>
-                <p className="text-2xl font-bold">₹85,430</p>
+        {/* Statistics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Subscriptions Stats */}
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <CreditCard className="text-purple-600" size={20} />
               </div>
-              <Wallet size={32} className="text-blue-200" />
+              <h3 className="text-lg font-semibold text-gray-900">Subscriptions</h3>
             </div>
-            <div className="mt-4 pt-4 border-t border-blue-400">
-              <input
-                type="text"
-                placeholder="Enter amount..."
-                className="w-full bg-blue-400 bg-opacity-30 text-white placeholder-blue-200 border-0 rounded-lg px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100">Bank Balance</p>
-                <p className="text-2xl font-bold">₹3,42,150</p>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Total</span>
+                <span className="text-lg font-bold text-gray-900">{dashboardData.subscriptions.total}</span>
               </div>
-              <CreditCard size={32} className="text-green-200" />
-            </div>
-            <div className="mt-4 pt-4 border-t border-green-400">
-              <input
-                type="text"
-                placeholder="Enter amount..."
-                className="w-full bg-green-400 bg-opacity-30 text-white placeholder-green-200 border-0 rounded-lg px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-orange-100">Receivables</p>
-                <p className="text-2xl font-bold">₹1,28,750</p>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Active</span>
+                <span className="text-sm font-semibold text-green-600">{dashboardData.subscriptions.active}</span>
               </div>
-              <TrendingUp size={32} className="text-orange-200" />
-            </div>
-            <div className="mt-4 pt-4 border-t border-orange-400">
-              <input
-                type="text"
-                placeholder="Enter amount..."
-                className="w-full bg-orange-400 bg-opacity-30 text-white placeholder-orange-200 border-0 rounded-lg px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-red-100">Payables</p>
-                <p className="text-2xl font-bold">₹64,320</p>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Expired</span>
+                <span className="text-sm font-semibold text-red-600">{dashboardData.subscriptions.expired}</span>
               </div>
-              <TrendingDown size={32} className="text-red-200" />
-            </div>
-            <div className="mt-4 pt-4 border-t border-red-400">
-              <input
-                type="text"
-                placeholder="Enter amount..."
-                className="w-full bg-red-400 bg-opacity-30 text-white placeholder-red-200 border-0 rounded-lg px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activities */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activities</h3>
-          <div className="space-y-4">
-            {[
-              { action: 'GST Return filed for ABC Corp', time: '2 hours ago', type: 'success' },
-              { action: 'ITR submitted for John Doe', time: '4 hours ago', type: 'info' },
-              { action: 'TDS payment processed', time: '6 hours ago', type: 'warning' },
-              { action: 'New client registration completed', time: '1 day ago', type: 'success' },
-            ].map((activity, index) => (
-              <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                <div className={`w-2 h-2 rounded-full ${
-                  activity.type === 'success' ? 'bg-green-500' :
-                  activity.type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
-                }`} />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                  <p className="text-xs text-gray-500">{activity.time}</p>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Cancelled</span>
+                <span className="text-sm font-semibold text-gray-600">{dashboardData.subscriptions.cancelled}</span>
+              </div>
+              <div className="pt-3 border-t border-gray-100">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-700">Total Revenue</span>
+                  <span className="text-sm font-bold text-gray-900">₹{dashboardData.subscriptions.revenue.total.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-gray-500">Active Revenue</span>
+                  <span className="text-xs text-green-600">₹{dashboardData.subscriptions.revenue.active.toLocaleString()}</span>
                 </div>
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* Companies Stats */}
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Building2 className="text-blue-600" size={20} />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Companies</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Total</span>
+                <span className="text-lg font-bold text-gray-900">{dashboardData.companies.total}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Active</span>
+                <span className="text-sm font-semibold text-green-600">{dashboardData.companies.active}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Inactive</span>
+                <span className="text-sm font-semibold text-gray-600">{dashboardData.companies.inactive}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Suspended</span>
+                <span className="text-sm font-semibold text-yellow-600">{dashboardData.companies.suspended}</span>
+              </div>
+              <div className="pt-3 border-t border-gray-100">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-700">With Subscription</span>
+                  <span className="text-sm font-bold text-green-600">{dashboardData.companies.withSubscription}</span>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-gray-500">Without Subscription</span>
+                  <span className="text-xs text-red-600">{dashboardData.companies.withoutSubscription}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Users Stats */}
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Users className="text-green-600" size={20} />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Users</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Total Users</span>
+                <span className="text-lg font-bold text-gray-900">{dashboardData.users.total.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Admins</span>
+                <span className="text-sm font-semibold text-blue-600">
+                  {dashboardData.users.admins.active}/{dashboardData.users.admins.total}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">HR</span>
+                <span className="text-sm font-semibold text-purple-600">
+                  {dashboardData.users.hr.active}/{dashboardData.users.hr.total}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Employees</span>
+                <span className="text-sm font-semibold text-green-600">
+                  {dashboardData.users.employees.active.toLocaleString()}/{dashboardData.users.employees.total.toLocaleString()}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Company Balances Table */}
+        {dashboardData.companyBalances && dashboardData.companyBalances.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">Company Balances</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Company
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Balance
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ledgers
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Vouchers
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Subscription
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {dashboardData.companyBalances.map((company) => (
+                    <tr key={company.companyId} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{company.companyName}</div>
+                          <div className="text-sm text-gray-500">{company.companyEmail}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          company.status === 'active' 
+                            ? 'bg-green-100 text-green-800'
+                            : company.status === 'suspended'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {company.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        ₹{company.balance.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {company.ledgerCount}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {company.voucherCount}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {company.subscription ? (
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{company.subscription.planName}</div>
+                            <div className="text-xs text-gray-500">
+                              {company.subscription.status} • {new Date(company.subscription.endDate).toLocaleDateString()}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400 italic">No subscription</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Transactions */}
+        {dashboardData.recentTransactions && dashboardData.recentTransactions.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Transactions</h3>
+            <div className="space-y-3">
+              {dashboardData.recentTransactions.map((transaction, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-2 rounded-lg ${
+                      transaction.type === 'Receipt' ? 'bg-green-100' : 'bg-red-100'
+                    }`}>
+                      {transaction.type === 'Receipt' ? (
+                        <ArrowUpRight className={`${transaction.type === 'Receipt' ? 'text-green-600' : 'text-red-600'}`} size={20} />
+                      ) : (
+                        <ArrowDownRight className="text-red-600" size={20} />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{transaction.voucherNumber}</p>
+                      <p className="text-xs text-gray-500">{transaction.company}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-sm font-semibold ${
+                      transaction.type === 'Receipt' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {transaction.type === 'Receipt' ? '+' : '-'}₹{transaction.amount.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(transaction.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Subscription Plans Summary */}
+        {dashboardData.plans && dashboardData.plans.list.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Subscription Plans</h3>
+              <span className="text-sm text-gray-500">
+                {dashboardData.plans.active} active of {dashboardData.plans.total} total
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {dashboardData.plans.list.map((plan) => (
+                <div key={plan.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-semibold text-gray-900">{plan.name}</h4>
+                    {plan.isActive && (
+                      <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">Active</span>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-600">Price:</span>
+                      <span className="font-semibold text-gray-900">₹{plan.price.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-600">Duration:</span>
+                      <span className="font-semibold text-gray-900">{plan.duration} months</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

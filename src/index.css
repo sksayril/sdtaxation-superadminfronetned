@@ -1,3 +1,40 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Notification animations */
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Custom notification styles */
+.notification-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.notification-exit {
+  animation: slideOutRight 0.3s ease-in;
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import LogoutConfirmation from './LogoutConfirmation';
 import {
   Home,
   Building2,
@@ -22,7 +23,9 @@ import {
   Download,
   Globe,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Shield,
+  CreditCard
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -36,15 +39,27 @@ export default function Layout({ children, title }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogoutClick = () => {
+    setShowLogoutConfirmation(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
     { path: '/company', label: 'Company', icon: Building2 },
+    { path: '/admin-management', label: 'Admin Management', icon: Shield },
+    { path: '/subscription-plans', label: 'Subscription Plans', icon: Package },
+    { path: '/company-subscriptions', label: 'Company Subscriptions', icon: CreditCard },
     { path: '/crm', label: 'CRM', icon: Users },
     { path: '/erp', label: 'ERP', icon: Package },
     { path: '/hrm', label: 'HRM', icon: UserCheck },
@@ -262,7 +277,7 @@ export default function Layout({ children, title }: LayoutProps) {
                   <span>{user?.name}</span>
                 </button>
                 <button
-                  onClick={handleLogout}
+                  onClick={handleLogoutClick}
                   className="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <LogOut size={16} />
@@ -286,6 +301,14 @@ export default function Layout({ children, title }: LayoutProps) {
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
+
+      {/* Logout Confirmation Dialog */}
+      <LogoutConfirmation
+        isOpen={showLogoutConfirmation}
+        onClose={() => setShowLogoutConfirmation(false)}
+        onConfirm={handleLogoutConfirm}
+        userName={user?.name}
+      />
     </div>
   );
 }

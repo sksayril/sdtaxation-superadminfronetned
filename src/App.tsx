@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { NotificationProvider, useNotification } from './contexts/NotificationContext';
+import NotificationContainer from './components/NotificationContainer';
+import { setNotificationContext } from './utils/toast';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Company from './pages/Company';
+import AdminManagement from './pages/AdminManagement';
 import CRM from './pages/CRM';
 import ERP from './pages/ERP';
 import HRM from './pages/HRM';
@@ -14,15 +18,46 @@ import GST from './pages/GST';
 import TDS from './pages/TDS';
 import ITR from './pages/ITR';
 import Profile from './pages/Profile';
+import SubscriptionPlans from './pages/SubscriptionPlans';
+import CompanySubscriptions from './pages/CompanySubscriptions';
+import { Loader2 } from 'lucide-react';
+
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-orange-50">
+      <div className="text-center">
+        <Loader2 className="animate-spin mx-auto mb-4 text-blue-600" size={48} />
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingScreen />;
+  }
+  
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 }
 
-function App() {
+function AppContent() {
+  const { notifications, closeNotification, showSuccess, showError, showWarning, showInfo } = useNotification();
+
+  // Set the notification context for the toast utility
+  useEffect(() => {
+    setNotificationContext({ 
+      showSuccess,
+      showError,
+      showWarning,
+      showInfo
+    });
+  }, [showSuccess, showError, showWarning, showInfo]);
+
   return (
-    <AuthProvider>
+    <>
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -34,6 +69,11 @@ function App() {
           <Route path="/company" element={
             <ProtectedRoute>
               <Company />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin-management" element={
+            <ProtectedRoute>
+              <AdminManagement />
             </ProtectedRoute>
           } />
           <Route path="/crm" element={
@@ -86,10 +126,34 @@ function App() {
               <Profile />
             </ProtectedRoute>
           } />
+          <Route path="/subscription-plans" element={
+            <ProtectedRoute>
+              <SubscriptionPlans />
+            </ProtectedRoute>
+          } />
+          <Route path="/company-subscriptions" element={
+            <ProtectedRoute>
+              <CompanySubscriptions />
+            </ProtectedRoute>
+          } />
           <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
       </Router>
-    </AuthProvider>
+      <NotificationContainer 
+        notifications={notifications} 
+        onClose={closeNotification} 
+      />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <NotificationProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </NotificationProvider>
   );
 }
 
