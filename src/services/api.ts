@@ -1,5 +1,5 @@
 // API Configuration and Service
-const API_BASE_URL = 'https://7cvccltb-3001.inc1.devtunnels.ms';
+const API_BASE_URL = 'https://api.sdtaxation.com';
 
 // Types for API responses
 export interface LoginRequest {
@@ -284,13 +284,21 @@ class ApiService {
     this.baseURL = baseURL;
   }
 
-  // Generic request method
+  /**
+   * Generic request method
+   *
+   * NOTE: We extend RequestInit with a `skipAuth` flag so that
+   * unauthenticated endpoints (like `/login`) can bypass the
+   * token/expiration checks and Authorization header injection.
+   */
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit & { skipAuth?: boolean } = {}
   ): Promise<T> {
+    const { skipAuth, ...fetchOptions } = options;
+
     const url = `${this.baseURL}${endpoint}`;
-    const token = tokenManager.getToken();
+    const token = skipAuth ? null : tokenManager.getToken();
 
     const defaultHeaders: HeadersInit = {
       'Content-Type': 'application/json',
@@ -301,16 +309,16 @@ class ApiService {
     }
 
     const config: RequestInit = {
-      ...options,
+      ...fetchOptions,
       headers: {
         ...defaultHeaders,
-        ...options.headers,
+        ...fetchOptions.headers,
       },
     };
 
     try {
-      // Check if token is expired before making request
-      if (token && tokenManager.isTokenExpired()) {
+      // Check if token is expired before making request (for auth-protected routes only)
+      if (!skipAuth && token && tokenManager.isTokenExpired()) {
         // Create a custom error for token expiration
         const expiredError: any = new Error('Token expired');
         expiredError.isTokenExpired = true;
@@ -347,9 +355,12 @@ class ApiService {
 
   // Authentication endpoints
   async login(credentials: LoginRequest): Promise<LoginResponse> {
+    // Login must NOT be blocked by an expired/invalid existing token.
+    // We explicitly skip auth so the request always reaches the server.
     return this.request<LoginResponse>('/api/superadmin/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
+      skipAuth: true,
     });
   }
 

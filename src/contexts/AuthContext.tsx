@@ -37,52 +37,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = tokenManager.getUserData();
 
         if (token && userData) {
-          // Check if token is expired first
-          if (tokenManager.isTokenExpired()) {
-            // Token is expired, clear auth and show modal
-            tokenManager.clearAuth();
-            setIsAuthenticated(false);
-            setUser(null);
-            setShowTokenExpiredModal(true);
-            setLoading(false);
-            return;
-          }
-
-          // Token is not expired, verify with server
+          // Verify token with server once on app load.
+          // If this fails (e.g. token really invalid) we silently clear auth and keep user on login.
           try {
             await apiService.getSuperAdminProfile();
-            // Token is valid, restore authentication
             setIsAuthenticated(true);
             setUser({
               ...userData,
               role: 'superadmin'
             });
-          } catch (error: any) {
-            // API call failed - check if it's due to token expiration
-            if (error.isTokenExpired || error.message?.includes('Token expired') || error.message?.includes('Unauthorized')) {
-              // Token expired on server side
-              tokenManager.clearAuth();
-              setIsAuthenticated(false);
-              setUser(null);
-              setShowTokenExpiredModal(true);
-            } else {
-              // Other error (network, server error, etc.) - keep user logged in if token is not expired
-              // Only clear auth if token is actually expired
-              if (tokenManager.isTokenExpired()) {
-                tokenManager.clearAuth();
-                setIsAuthenticated(false);
-                setUser(null);
-                setShowTokenExpiredModal(true);
-              } else {
-                // Token is still valid, restore authentication even if API call failed
-                setIsAuthenticated(true);
-                setUser({
-                  ...userData,
-                  role: 'superadmin'
-                });
-                console.warn('API verification failed but token is valid, keeping user logged in:', error);
-              }
-            }
+          } catch (error) {
+            // Token invalid or server said unauthorized – clear and stay logged out.
+            tokenManager.clearAuth();
+            setIsAuthenticated(false);
+            setUser(null);
           }
         } else {
           // No token or user data, user is not authenticated
@@ -184,22 +152,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Monitor token expiration periodically
   useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const checkTokenExpiration = () => {
-      if (tokenManager.isTokenExpired()) {
-        setShowTokenExpiredModal(true);
-      }
+    // Expose a global handler that API service will call when it receives 401/Unauthorized
+    (window as any).__handleTokenExpiration = () => {
+      setShowTokenExpiredModal(true);
     };
-
-    // Check immediately
-    checkTokenExpiration();
-
-    // Check every 30 seconds
-    const interval = setInterval(checkTokenExpiration, 30000);
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ 
