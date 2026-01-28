@@ -7,7 +7,7 @@ import DeleteAdminModal from '../components/DeleteAdminModal';
 import { AdminTableSkeleton, LoadingSpinner } from '../components/SkeletonLoader';
 import { apiService, type Company, type CreateAdminRequest, type Admin, type UpdateAdminRequest } from '../services/api';
 import { toast } from '../utils/toast';
-import { UserCheck, Plus, Search, RefreshCw, Eye, Edit, Trash2, Mail, Phone, MapPin, Calendar, Shield, Building2 } from 'lucide-react';
+import { UserCheck, Plus, Search, RefreshCw, Eye, Edit, Trash2, Mail, Phone, MapPin, Shield, Building2, Check } from 'lucide-react';
 
 export default function AdminManagement() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -208,16 +208,6 @@ export default function AdminManagement() {
   });
 
 
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   return (
     <Layout title="Admin Management">
@@ -389,9 +379,6 @@ export default function AdminManagement() {
                       Status
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">
-                      Last Login
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -460,12 +447,6 @@ export default function AdminManagement() {
                           {admin.status}
                         </span>
                       </td>
-                      <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 text-gray-400 mr-1" />
-                          {formatDate(admin.lastLogin)}
-                        </div>
-                      </td>
                       <td className="px-6 py-5 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
                           <button
@@ -474,6 +455,15 @@ export default function AdminManagement() {
                             title="View Admin Details"
                           >
                             <Eye size={16} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              window.open('https://admin.sdtaxation.com/', '_blank');
+                            }}
+                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                            title="Open Admin Portal"
+                          >
+                            <Check size={16} />
                           </button>
                           <button
                             onClick={() => handleEditAdmin(admin)}

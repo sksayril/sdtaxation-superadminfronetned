@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, ExternalLink } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('superadmin@gmail.com');
@@ -133,6 +133,15 @@ export default function Login() {
               ) : (
                 <span>LOGIN</span>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => window.open('https://admin.sdtaxation.com/', '_blank')}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all flex items-center justify-center space-x-2 uppercase tracking-wide"
+            >
+              <ExternalLink size={16} />
+              <span>Admin Portal</span>
             </button>
 
             <div className="flex items-center justify-between text-sm">

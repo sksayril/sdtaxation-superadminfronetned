@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LogoutConfirmation from './LogoutConfirmation';
@@ -24,8 +24,11 @@ import {
   Globe,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Shield,
-  CreditCard
+  CreditCard,
+  Lock,
+  CheckSquare
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -40,6 +43,8 @@ export default function Layout({ children, title }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogoutClick = () => {
     setShowLogoutConfirmation(true);
@@ -52,6 +57,34 @@ export default function Layout({ children, title }: LayoutProps) {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    if (userDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [userDropdownOpen]);
+
+  // Format date for last login display
+  const formatLastLogin = () => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes} IST`;
   };
 
   const menuItems = [
@@ -268,21 +301,74 @@ export default function Layout({ children, title }: LayoutProps) {
                 <Calendar size={16} />
                 <span>{new Date().toLocaleDateString()}</span>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 relative" ref={userDropdownRef}>
                 <button
-                  onClick={() => navigate('/profile')}
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <User size={16} />
-                  <span>{user?.name}</span>
+                  <span className="lowercase">{user?.name || 'superadmin'}</span>
+                  <ChevronDown 
+                    size={16} 
+                    className={`text-gray-500 transition-transform duration-200 ${
+                      userDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
                 </button>
-                <button
-                  onClick={handleLogoutClick}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <LogOut size={16} />
-                  <span>Logout</span>
-                </button>
+                
+                {/* User Dropdown Menu */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="p-4 border-b border-gray-200">
+                      <div className="text-xs text-gray-500 mb-1">Last Logged In at</div>
+                      <div className="text-sm text-gray-700 font-medium">{formatLastLogin()}</div>
+                    </div>
+                    <div className="py-2">
+                      <button
+                        onClick={() => {
+                          navigate('/profile');
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <User size={16} className="text-gray-500" />
+                        <span>My Profile</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Navigate to change password page or open modal
+                          setUserDropdownOpen(false);
+                          // Add change password functionality here
+                        }}
+                        className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <Lock size={16} className="text-gray-500" />
+                        <span>Change Password</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Navigate to DSC registration/update page
+                          setUserDropdownOpen(false);
+                          // Add DSC functionality here
+                        }}
+                        className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <CheckSquare size={16} className="text-gray-500" />
+                        <span>Register / Update DSC</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setUserDropdownOpen(false);
+                          handleLogoutClick();
+                        }}
+                        className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut size={16} />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
