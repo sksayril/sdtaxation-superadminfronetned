@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import LogoutConfirmation from './LogoutConfirmation';
 import {
   Home,
@@ -38,6 +39,7 @@ interface LayoutProps {
 
 export default function Layout({ children, title }: LayoutProps) {
   const { user, logout } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -45,6 +47,66 @@ export default function Layout({ children, title }: LayoutProps) {
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Get active menu item classes based on theme
+  const getActiveMenuClasses = (isActive: boolean) => {
+    if (!isActive) {
+      return 'text-gray-600 hover:bg-gray-50 hover:text-gray-900';
+    }
+    
+    const activeClassMap: Record<string, string> = {
+      blue: 'bg-blue-50 text-blue-700 border-r-2 border-blue-700',
+      purple: 'bg-purple-50 text-purple-700 border-r-2 border-purple-700',
+      green: 'bg-green-50 text-green-700 border-r-2 border-green-700',
+      orange: 'bg-orange-50 text-orange-700 border-r-2 border-orange-700',
+      red: 'bg-red-50 text-red-700 border-r-2 border-red-700',
+      indigo: 'bg-indigo-50 text-indigo-700 border-r-2 border-indigo-700',
+    };
+    
+    return activeClassMap[theme.name] || activeClassMap.blue;
+  };
+  
+  // Get sidebar header gradient classes
+  const getSidebarHeaderClasses = () => {
+    const headerClassMap: Record<string, string> = {
+      blue: 'bg-gradient-to-r from-blue-600 to-blue-700',
+      purple: 'bg-gradient-to-r from-purple-600 to-purple-700',
+      green: 'bg-gradient-to-r from-green-600 to-green-700',
+      orange: 'bg-gradient-to-r from-orange-600 to-orange-700',
+      red: 'bg-gradient-to-r from-red-600 to-red-700',
+      indigo: 'bg-gradient-to-r from-indigo-600 to-indigo-700',
+    };
+    
+    return headerClassMap[theme.name] || headerClassMap.blue;
+  };
+
+  // Get sidebar background color classes
+  const getSidebarBgClasses = () => {
+    const sidebarBgMap: Record<string, string> = {
+      blue: 'bg-blue-50',
+      purple: 'bg-purple-50',
+      green: 'bg-green-50',
+      orange: 'bg-orange-50',
+      red: 'bg-red-50',
+      indigo: 'bg-indigo-50',
+    };
+    
+    return sidebarBgMap[theme.name] || sidebarBgMap.blue;
+  };
+
+  // Get page background color classes
+  const getPageBgClasses = () => {
+    const pageBgMap: Record<string, string> = {
+      blue: 'bg-blue-50',
+      purple: 'bg-purple-50',
+      green: 'bg-green-50',
+      orange: 'bg-orange-50',
+      red: 'bg-red-50',
+      indigo: 'bg-indigo-50',
+    };
+    
+    return pageBgMap[theme.name] || pageBgMap.blue;
+  };
 
   const handleLogoutClick = () => {
     setShowLogoutConfirmation(true);
@@ -108,15 +170,15 @@ export default function Layout({ children, title }: LayoutProps) {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className={`flex h-screen ${getPageBgClasses()} overflow-hidden`}>
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 bg-white shadow-lg transform transition-all duration-300 ease-in-out
-        lg:relative lg:translate-x-0
+        fixed inset-y-0 left-0 z-50 ${getSidebarBgClasses()} shadow-lg transform transition-all duration-300 ease-in-out
+        lg:relative lg:translate-x-0 flex flex-col h-screen
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${sidebarOpen ? 'w-64' : 'w-16 lg:w-16'}
       `}>
-        <div className={`flex items-center justify-between h-16 px-4 bg-gradient-to-r from-blue-600 to-blue-700 ${
+        <div className={`flex items-center justify-between h-16 px-4 flex-shrink-0 ${getSidebarHeaderClasses()} ${
           !sidebarOpen ? 'px-2' : ''
         }`}>
           {sidebarOpen && (
@@ -139,7 +201,7 @@ export default function Layout({ children, title }: LayoutProps) {
           </button>
         </div>
 
-        <div className="flex-1 px-2 py-6 overflow-y-auto h-full">
+        <div className="flex-1 px-2 py-6 overflow-y-auto overflow-x-hidden min-h-0">
           <nav className="space-y-2">
             <div className="pb-4">
               {sidebarOpen && (
@@ -157,11 +219,7 @@ export default function Layout({ children, title }: LayoutProps) {
                       navigate(item.path);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    } ${!sidebarOpen ? 'justify-center' : ''}`}
+                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative ${getActiveMenuClasses(isActive)} ${!sidebarOpen ? 'justify-center' : ''}`}
                     title={!sidebarOpen ? item.label : ''}
                   >
                     <Icon size={20} className={sidebarOpen ? 'mr-3' : ''} />
@@ -179,7 +237,7 @@ export default function Layout({ children, title }: LayoutProps) {
             <div className="pt-4 border-t border-gray-200">
               {sidebarOpen && (
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-2">
-                  Tax Modules
+                  TAX MODULES
                 </h3>
               )}
               {taxMenuItems.map((item) => {
@@ -192,15 +250,11 @@ export default function Layout({ children, title }: LayoutProps) {
                       navigate(item.path);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative ${
-                      isActive
-                        ? 'bg-orange-50 text-orange-700 border-r-2 border-orange-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    } ${!sidebarOpen ? 'justify-center' : ''}`}
+                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative ${getActiveMenuClasses(isActive)} ${!sidebarOpen ? 'justify-center' : ''}`}
                     title={!sidebarOpen ? item.label : ''}
                   >
                     <Icon size={20} className={sidebarOpen ? 'mr-3' : ''} />
-                    {sidebarOpen && <span>{item.label}</span>}
+                    {sidebarOpen && <span className="font-bold">{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -219,19 +273,19 @@ export default function Layout({ children, title }: LayoutProps) {
                 <div className="grid grid-cols-2 gap-2 px-1">
                   <button className="flex flex-col items-center p-3 text-xs text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                     <Mail size={16} className="mb-1" />
-                    <span>Gmail</span>
+                    <span className="font-bold">Gmail</span>
                   </button>
                   <button className="flex flex-col items-center p-3 text-xs text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                     <Download size={16} className="mb-1" />
-                    <span>Download</span>
+                    <span className="font-bold">Download</span>
                   </button>
                   <button className="flex flex-col items-center p-3 text-xs text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                     <Globe size={16} className="mb-1" />
-                    <span>Online</span>
+                    <span className="font-bold">Online</span>
                   </button>
                   <button className="flex flex-col items-center p-3 text-xs text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                     <Receipt size={16} className="mb-1" />
-                    <span>E-way Bill</span>
+                    <span className="font-bold">E-way Bill</span>
                   </button>
                 </div>
               </div>
@@ -320,7 +374,7 @@ export default function Layout({ children, title }: LayoutProps) {
                 {userDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="p-4 border-b border-gray-200">
-                      <div className="text-xs text-gray-500 mb-1">Last Logged In at</div>
+                      <div className="text-xs text-gray-500 mb-1 font-bold">Last Logged In at</div>
                       <div className="text-sm text-gray-700 font-medium">{formatLastLogin()}</div>
                     </div>
                     <div className="py-2">
@@ -332,7 +386,7 @@ export default function Layout({ children, title }: LayoutProps) {
                         className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         <User size={16} className="text-gray-500" />
-                        <span>My Profile</span>
+                        <span className="font-bold">My Profile</span>
                       </button>
                       <button
                         onClick={() => {
@@ -343,7 +397,7 @@ export default function Layout({ children, title }: LayoutProps) {
                         className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         <Lock size={16} className="text-gray-500" />
-                        <span>Change Password</span>
+                        <span className="font-bold">Change Password</span>
                       </button>
                       <button
                         onClick={() => {
@@ -354,7 +408,7 @@ export default function Layout({ children, title }: LayoutProps) {
                         className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         <CheckSquare size={16} className="text-gray-500" />
-                        <span>Register / Update DSC</span>
+                        <span className="font-bold">Register / Update DSC</span>
                       </button>
                       <button
                         onClick={() => {
@@ -364,7 +418,7 @@ export default function Layout({ children, title }: LayoutProps) {
                         className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
                         <LogOut size={16} />
-                        <span>Logout</span>
+                        <span className="font-bold">Logout</span>
                       </button>
                     </div>
                   </div>
@@ -375,7 +429,7 @@ export default function Layout({ children, title }: LayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
+        <main className={`flex-1 overflow-y-auto p-6 ${getPageBgClasses()}`}>
           {children}
         </main>
       </div>

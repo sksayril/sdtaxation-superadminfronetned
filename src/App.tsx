@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { NotificationProvider, useNotification } from './contexts/NotificationContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import NotificationContainer from './components/NotificationContainer';
 import { setNotificationContext } from './utils/toast';
 import Login from './pages/Login';
@@ -149,11 +150,13 @@ function AppContent() {
 
 function App() {
   return (
-    <NotificationProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </NotificationProvider>
+    <ThemeProvider>
+      <NotificationProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </NotificationProvider>
+    </ThemeProvider>
   );
 }
 
