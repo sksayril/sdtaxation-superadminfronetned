@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Building2, Mail, Phone, MapPin, Globe, Upload, Loader2 } from 'lucide-react';
-import { CreateCompanyRequest, CompanyAddress } from '../services/api';
+import { X, Building2, Mail, Phone, MapPin, Globe, Loader2, FileText, Calendar } from 'lucide-react';
+import { CreateCompanyRequest } from '../services/api';
 import { getPostOfficeByPincode, extractAddressFromPostOffice } from '../utils/pincodeApi';
 
 interface CreateCompanyModalProps {
@@ -28,8 +28,12 @@ export default function CreateCompanyModal({
       zipCode: ''
     },
     company_website: '',
-    company_logo: ''
+    gstNumber: '',
+    fiscalYear: ''
   });
+  
+  const [fiscalStartYear, setFiscalStartYear] = useState<string>('');
+  const [fiscalEndYear, setFiscalEndYear] = useState<string>('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pincodeLoading, setPincodeLoading] = useState(false);
@@ -120,6 +124,29 @@ export default function CreateCompanyModal({
     }
   };
 
+  const handleFiscalYearChange = (startYear: string, endYear: string) => {
+    setFiscalStartYear(startYear);
+    setFiscalEndYear(endYear);
+    
+    if (startYear && endYear) {
+      // Validate that end year is start year + 1
+      const start = parseInt(startYear);
+      const end = parseInt(endYear);
+      
+      if (end !== start + 1) {
+        setErrors(prev => ({ ...prev, fiscalYear: 'End year must be start year + 1 (e.g., 2024-2025)' }));
+        setFormData(prev => ({ ...prev, fiscalYear: '' }));
+      } else {
+        setFormData(prev => ({ ...prev, fiscalYear: `${startYear}-${endYear}` }));
+        if (errors.fiscalYear) {
+          setErrors(prev => ({ ...prev, fiscalYear: '' }));
+        }
+      }
+    } else {
+      setFormData(prev => ({ ...prev, fiscalYear: '' }));
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -155,6 +182,27 @@ export default function CreateCompanyModal({
       newErrors['address.zipCode'] = 'ZIP code is required';
     }
 
+    // Validate GST number format if provided (15 characters, alphanumeric)
+    if (formData.gstNumber && formData.gstNumber.trim()) {
+      const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+      if (!gstRegex.test(formData.gstNumber.trim().toUpperCase())) {
+        newErrors.gstNumber = 'Please enter a valid GST number (15 characters, alphanumeric)';
+      }
+    }
+
+    // Validate fiscal year format if provided (YYYY-YYYY)
+    if (formData.fiscalYear && formData.fiscalYear.trim()) {
+      const fiscalRegex = /^\d{4}-\d{4}$/;
+      if (!fiscalRegex.test(formData.fiscalYear.trim())) {
+        newErrors.fiscalYear = 'Please enter fiscal year in format YYYY-YYYY (e.g., 2024-2025)';
+      } else {
+        const [start, end] = formData.fiscalYear.split('-').map(Number);
+        if (end !== start + 1) {
+          newErrors.fiscalYear = 'End year must be start year + 1 (e.g., 2024-2025)';
+        }
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -181,8 +229,11 @@ export default function CreateCompanyModal({
           zipCode: ''
         },
         company_website: '',
-        company_logo: ''
+        gstNumber: '',
+        fiscalYear: ''
       });
+      setFiscalStartYear('');
+      setFiscalEndYear('');
       setErrors({});
     } catch (error) {
       console.error('Form submission error:', error);
@@ -293,6 +344,88 @@ export default function CreateCompanyModal({
                 placeholder="https://www.company.com"
                 disabled={loading}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <FileText className="inline mr-1" size={16} />
+                GST Number (Optional)
+              </label>
+              <input
+                type="text"
+                value={formData.gstNumber}
+                onChange={(e) => handleInputChange('gstNumber', e.target.value.toUpperCase())}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.gstNumber ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="15-digit GST number"
+                maxLength={15}
+                disabled={loading}
+              />
+              {errors.gstNumber && (
+                <p className="mt-1 text-sm text-red-600">{errors.gstNumber}</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Calendar className="inline mr-1" size={16} />
+                  Fiscal Year Start (Optional)
+                </label>
+                <select
+                  value={fiscalStartYear}
+                  onChange={(e) => handleFiscalYearChange(e.target.value, fiscalEndYear)}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.fiscalYear ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  <option value="">Select Start Year</option>
+                  {Array.from({ length: 20 }, (_, i) => {
+                    const year = new Date().getFullYear() - 5 + i;
+                    return (
+                      <option key={year} value={year.toString()}>
+                        {year}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Calendar className="inline mr-1" size={16} />
+                  Fiscal Year End (Optional)
+                </label>
+                <select
+                  value={fiscalEndYear}
+                  onChange={(e) => handleFiscalYearChange(fiscalStartYear, e.target.value)}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.fiscalYear ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  disabled={loading || !fiscalStartYear}
+                >
+                  <option value="">Select End Year</option>
+                  {fiscalStartYear && Array.from({ length: 5 }, (_, i) => {
+                    const startYear = parseInt(fiscalStartYear);
+                    const year = startYear + 1 + i;
+                    return (
+                      <option key={year} value={year.toString()}>
+                        {year}
+                      </option>
+                    );
+                  })}
+                </select>
+                {fiscalStartYear && fiscalEndYear && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Fiscal Year: {fiscalStartYear}-{fiscalEndYear}
+                  </p>
+                )}
+                {errors.fiscalYear && (
+                  <p className="mt-1 text-sm text-red-600">{errors.fiscalYear}</p>
+                )}
+              </div>
             </div>
           </div>
 

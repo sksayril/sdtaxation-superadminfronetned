@@ -1,4 +1,4 @@
-import { X, Building2, Mail, Phone, MapPin, Globe, Calendar, User, Loader2 } from 'lucide-react';
+import { X, Building2, Mail, Phone, MapPin, Globe, Calendar, User, Loader2, FileText } from 'lucide-react';
 import { Company } from '../services/api';
 
 interface CompanyDetailsModalProps {
@@ -99,7 +99,7 @@ export default function CompanyDetailsModal({
                     <p className="text-gray-900">{company.company_phone}</p>
                   </div>
                   {company.company_website && (
-                    <div className="md:col-span-2">
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
                         <Globe className="mr-1" size={14} />
                         Website
@@ -112,6 +112,24 @@ export default function CompanyDetailsModal({
                       >
                         {company.company_website}
                       </a>
+                    </div>
+                  )}
+                  {company.gstNumber && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                        <FileText className="mr-1" size={14} />
+                        GST Number
+                      </label>
+                      <p className="text-gray-900 font-medium">{company.gstNumber}</p>
+                    </div>
+                  )}
+                  {company.fiscalYear && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                        <Calendar className="mr-1" size={14} />
+                        Finalcial Year
+                      </label>
+                      <p className="text-gray-900 font-medium">{company.fiscalYear}</p>
                     </div>
                   )}
                 </div>

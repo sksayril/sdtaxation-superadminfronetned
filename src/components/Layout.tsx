@@ -51,19 +51,35 @@ export default function Layout({ children, title }: LayoutProps) {
   // Get active menu item classes based on theme
   const getActiveMenuClasses = (isActive: boolean) => {
     if (!isActive) {
-      return 'text-gray-600 hover:bg-gray-50 hover:text-gray-900';
+      return 'text-white hover:bg-white hover:bg-opacity-10';
     }
     
     const activeClassMap: Record<string, string> = {
-      blue: 'bg-blue-50 text-blue-700 border-r-2 border-blue-700',
-      purple: 'bg-purple-50 text-purple-700 border-r-2 border-purple-700',
-      green: 'bg-green-50 text-green-700 border-r-2 border-green-700',
-      orange: 'bg-orange-50 text-orange-700 border-r-2 border-orange-700',
-      red: 'bg-red-50 text-red-700 border-r-2 border-red-700',
-      indigo: 'bg-indigo-50 text-indigo-700 border-r-2 border-indigo-700',
+      blue: 'bg-white text-blue-600 rounded-lg',
+      purple: 'bg-white text-purple-600 rounded-lg',
+      green: 'bg-white text-green-600 rounded-lg',
+      orange: 'bg-white text-orange-600 rounded-lg',
+      red: 'bg-white text-red-600 rounded-lg',
+      indigo: 'bg-white text-indigo-600 rounded-lg',
     };
     
     return activeClassMap[theme.name] || activeClassMap.blue;
+  };
+  
+  // Get inactive icon color classes
+  const getInactiveIconClasses = (isActive: boolean) => {
+    if (isActive) {
+      const iconColorMap: Record<string, string> = {
+        blue: 'text-blue-600',
+        purple: 'text-purple-600',
+        green: 'text-green-600',
+        orange: 'text-orange-600',
+        red: 'text-red-600',
+        indigo: 'text-indigo-600',
+      };
+      return iconColorMap[theme.name] || iconColorMap.blue;
+    }
+    return 'text-white';
   };
   
   // Get sidebar header gradient classes
@@ -80,15 +96,15 @@ export default function Layout({ children, title }: LayoutProps) {
     return headerClassMap[theme.name] || headerClassMap.blue;
   };
 
-  // Get sidebar background color classes
+  // Get sidebar background gradient classes
   const getSidebarBgClasses = () => {
     const sidebarBgMap: Record<string, string> = {
-      blue: 'bg-blue-50',
-      purple: 'bg-purple-50',
-      green: 'bg-green-50',
-      orange: 'bg-orange-50',
-      red: 'bg-red-50',
-      indigo: 'bg-indigo-50',
+      blue: 'bg-gradient-to-b from-blue-600 to-blue-700',
+      purple: 'bg-gradient-to-b from-purple-600 to-purple-700',
+      green: 'bg-gradient-to-b from-green-600 to-green-700',
+      orange: 'bg-gradient-to-b from-orange-600 to-orange-700',
+      red: 'bg-gradient-to-b from-red-600 to-red-700',
+      indigo: 'bg-gradient-to-b from-indigo-600 to-indigo-700',
     };
     
     return sidebarBgMap[theme.name] || sidebarBgMap.blue;
@@ -205,7 +221,7 @@ export default function Layout({ children, title }: LayoutProps) {
           <nav className="space-y-2">
             <div className="pb-4">
               {sidebarOpen && (
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-2">
+                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
                   Main Menu
                 </h3>
               )}
@@ -219,11 +235,11 @@ export default function Layout({ children, title }: LayoutProps) {
                       navigate(item.path);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative ${getActiveMenuClasses(isActive)} ${!sidebarOpen ? 'justify-center' : ''}`}
+                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative ${getActiveMenuClasses(isActive)} ${!sidebarOpen ? 'justify-center' : ''}`}
                     title={!sidebarOpen ? item.label : ''}
                   >
-                    <Icon size={20} className={sidebarOpen ? 'mr-3' : ''} />
-                    {sidebarOpen && <span>{item.label}</span>}
+                    <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
+                    {sidebarOpen && <span className={isActive ? '' : 'text-white'}>{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -234,9 +250,9 @@ export default function Layout({ children, title }: LayoutProps) {
               })}
             </div>
 
-            <div className="pt-4 border-t border-gray-200">
+            <div className="pt-4 border-t border-white border-opacity-20">
               {sidebarOpen && (
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-2">
+                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
                   TAX MODULES
                 </h3>
               )}
@@ -250,11 +266,11 @@ export default function Layout({ children, title }: LayoutProps) {
                       navigate(item.path);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative ${getActiveMenuClasses(isActive)} ${!sidebarOpen ? 'justify-center' : ''}`}
+                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative ${getActiveMenuClasses(isActive)} ${!sidebarOpen ? 'justify-center' : ''}`}
                     title={!sidebarOpen ? item.label : ''}
                   >
-                    <Icon size={20} className={sidebarOpen ? 'mr-3' : ''} />
-                    {sidebarOpen && <span className="font-bold">{item.label}</span>}
+                    <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
+                    {sidebarOpen && <span className={`font-bold ${isActive ? '' : 'text-white'}`}>{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -266,24 +282,24 @@ export default function Layout({ children, title }: LayoutProps) {
             </div>
 
             {sidebarOpen && (
-              <div className="pt-4 border-t border-gray-200">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-2">
+              <div className="pt-4 border-t border-white border-opacity-20">
+                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
                   Quick Actions
                 </h3>
                 <div className="grid grid-cols-2 gap-2 px-1">
-                  <button className="flex flex-col items-center p-3 text-xs text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button className="flex flex-col items-center p-3 text-xs text-white bg-white bg-opacity-10 rounded-lg hover:bg-opacity-20 transition-colors">
                     <Mail size={16} className="mb-1" />
                     <span className="font-bold">Gmail</span>
                   </button>
-                  <button className="flex flex-col items-center p-3 text-xs text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button className="flex flex-col items-center p-3 text-xs text-white bg-white bg-opacity-10 rounded-lg hover:bg-opacity-20 transition-colors">
                     <Download size={16} className="mb-1" />
                     <span className="font-bold">Download</span>
                   </button>
-                  <button className="flex flex-col items-center p-3 text-xs text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button className="flex flex-col items-center p-3 text-xs text-white bg-white bg-opacity-10 rounded-lg hover:bg-opacity-20 transition-colors">
                     <Globe size={16} className="mb-1" />
                     <span className="font-bold">Online</span>
                   </button>
-                  <button className="flex flex-col items-center p-3 text-xs text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button className="flex flex-col items-center p-3 text-xs text-white bg-white bg-opacity-10 rounded-lg hover:bg-opacity-20 transition-colors">
                     <Receipt size={16} className="mb-1" />
                     <span className="font-bold">E-way Bill</span>
                   </button>

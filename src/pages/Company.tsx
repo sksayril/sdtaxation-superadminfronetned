@@ -364,9 +364,6 @@ export default function Company() {
                       Phone
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Address
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -400,15 +397,6 @@ export default function Company() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{company.company_phone}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
-                          <div>{company.company_address.street}</div>
-                          <div className="text-gray-500">
-                            {company.company_address.city}, {company.company_address.state} {company.company_address.zipCode}
-                          </div>
-                          <div className="text-gray-500">{company.company_address.country}</div>
-                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

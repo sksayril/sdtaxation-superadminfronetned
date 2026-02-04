@@ -39,7 +39,9 @@ export interface CreateCompanyRequest {
   company_phone: string;
   company_address: CompanyAddress;
   company_website?: string;
-  company_logo?: string;
+  company_logo?: File | string;
+  gstNumber?: string;
+  fiscalYear?: string; // Format: YYYY-YYYY
 }
 
 export interface Company {
@@ -50,6 +52,8 @@ export interface Company {
   company_address: CompanyAddress;
   company_logo?: string;
   company_website?: string;
+  gstNumber?: string;
+  fiscalYear?: string;
   status: string;
   created_by: {
     _id: string;
@@ -381,10 +385,64 @@ class ApiService {
   }
 
   async createCompany(companyData: CreateCompanyRequest): Promise<CreateCompanyResponse> {
-    return this.request<CreateCompanyResponse>('/api/companies/create', {
+    // Create FormData for multipart/form-data
+    const formData = new FormData();
+    
+    // Add required fields
+    formData.append('company_name', companyData.company_name);
+    formData.append('company_email', companyData.company_email);
+    formData.append('company_phone', companyData.company_phone);
+    
+    // Add address as JSON string
+    formData.append('company_address', JSON.stringify(companyData.company_address));
+    
+    // Add optional fields if they exist
+    if (companyData.company_website) {
+      formData.append('company_website', companyData.company_website);
+    }
+    
+    if (companyData.gstNumber) {
+      formData.append('gstNumber', companyData.gstNumber);
+    }
+    
+    if (companyData.fiscalYear) {
+      formData.append('fiscalYear', companyData.fiscalYear);
+    }
+    
+    // Use custom request for FormData (don't set Content-Type header)
+    const url = `${this.baseURL}/api/companies/create`;
+    const token = tokenManager.getToken();
+    
+    if (token && tokenManager.isTokenExpired()) {
+      const expiredError: any = new Error('Token expired');
+      expiredError.isTokenExpired = true;
+      throw expiredError;
+    }
+    
+    const headers: HeadersInit = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    // Don't set Content-Type - browser will set it with boundary for FormData
+    
+    const response = await fetch(url, {
       method: 'POST',
-      body: JSON.stringify(companyData),
+      headers,
+      body: formData,
     });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      const error: ApiError = {
+        success: false,
+        message: data.message || 'Failed to create company',
+        error: data.error,
+      };
+      throw error;
+    }
+    
+    return data;
   }
 
   async getCompanyById(companyId: string): Promise<GetCompanyResponse> {
