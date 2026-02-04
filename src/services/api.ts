@@ -42,6 +42,7 @@ export interface CreateCompanyRequest {
   company_logo?: File | string;
   gstNumber?: string;
   fiscalYear?: string; // Format: YYYY-YYYY
+  industry?: string;
 }
 
 export interface Company {
@@ -54,6 +55,7 @@ export interface Company {
   company_website?: string;
   gstNumber?: string;
   fiscalYear?: string;
+  industry?: string;
   status: string;
   created_by: {
     _id: string;
@@ -407,6 +409,10 @@ class ApiService {
     
     if (companyData.fiscalYear) {
       formData.append('fiscalYear', companyData.fiscalYear);
+    }
+    
+    if (companyData.industry) {
+      formData.append('industry', companyData.industry);
     }
     
     // Use custom request for FormData (don't set Content-Type header)

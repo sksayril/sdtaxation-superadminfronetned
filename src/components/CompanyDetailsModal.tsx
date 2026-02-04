@@ -1,4 +1,4 @@
-import { X, Building2, Mail, Phone, MapPin, Globe, Calendar, User, Loader2, FileText } from 'lucide-react';
+import { X, Building2, Mail, Phone, MapPin, Globe, Calendar, User, Loader2, FileText, Briefcase } from 'lucide-react';
 import { Company } from '../services/api';
 
 interface CompanyDetailsModalProps {
@@ -130,6 +130,15 @@ export default function CompanyDetailsModal({
                         Finalcial Year
                       </label>
                       <p className="text-gray-900 font-medium">{company.fiscalYear}</p>
+                    </div>
+                  )}
+                  {company.industry && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                        <Briefcase className="mr-1" size={14} />
+                        Industry
+                      </label>
+                      <p className="text-gray-900 font-medium">{company.industry}</p>
                     </div>
                   )}
                 </div>

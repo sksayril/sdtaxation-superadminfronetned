@@ -1,7 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Building2, Mail, Phone, MapPin, Globe, Loader2 } from 'lucide-react';
+import { X, Building2, Mail, Phone, MapPin, Globe, Loader2, Briefcase } from 'lucide-react';
 import { Company, UpdateCompanyRequest, CompanyAddress } from '../services/api';
 import { getPostOfficeByPincode, extractAddressFromPostOffice } from '../utils/pincodeApi';
+
+const INDUSTRIES = [
+  'Agriculture',
+  'Manufacturing',
+  'Construction',
+  'Retail Trade',
+  'Wholesale Trade',
+  'Transportation & Logistics',
+  'Education',
+  'Healthcare',
+  'Finance & Insurance',
+  'Information Technology & Services',
+  'Professional & Business Services',
+  'Hospitality & Tourism'
+];
 
 interface EditCompanyModalProps {
   isOpen: boolean;
@@ -30,7 +45,10 @@ export default function EditCompanyModal({
       zipCode: ''
     },
     company_website: '',
-    company_logo: ''
+    company_logo: '',
+    gstNumber: '',
+    fiscalYear: '',
+    industry: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -114,7 +132,10 @@ export default function EditCompanyModal({
           zipCode: company.company_address?.zipCode || ''
         },
         company_website: company.company_website || '',
-        company_logo: company.company_logo || ''
+        company_logo: company.company_logo || '',
+        gstNumber: company.gstNumber || '',
+        fiscalYear: company.fiscalYear || '',
+        industry: company.industry || ''
       });
       setErrors({});
     }
@@ -176,6 +197,10 @@ export default function EditCompanyModal({
 
     if (!formData.company_address.zipCode.trim()) {
       newErrors['address.zipCode'] = 'ZIP code is required';
+    }
+
+    if (!formData.industry || !formData.industry.trim()) {
+      newErrors.industry = 'Industry is required';
     }
 
     setErrors(newErrors);
@@ -302,6 +327,31 @@ export default function EditCompanyModal({
                 placeholder="https://www.company.com"
                 disabled={loading}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Briefcase className="inline mr-1" size={16} />
+                Industry *
+              </label>
+              <select
+                value={formData.industry}
+                onChange={(e) => handleInputChange('industry', e.target.value)}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.industry ? 'border-red-300' : 'border-gray-300'
+                }`}
+                disabled={loading}
+              >
+                <option value="">Select Industry</option>
+                {INDUSTRIES.map((industry: string) => (
+                  <option key={industry} value={industry}>
+                    {industry}
+                  </option>
+                ))}
+              </select>
+              {errors.industry && (
+                <p className="mt-1 text-sm text-red-600">{errors.industry}</p>
+              )}
             </div>
           </div>
 

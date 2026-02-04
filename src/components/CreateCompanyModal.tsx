@@ -1,7 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Building2, Mail, Phone, MapPin, Globe, Loader2, FileText, Calendar } from 'lucide-react';
+import { X, Building2, Mail, Phone, MapPin, Globe, Loader2, FileText, Calendar, Briefcase } from 'lucide-react';
 import { CreateCompanyRequest } from '../services/api';
 import { getPostOfficeByPincode, extractAddressFromPostOffice } from '../utils/pincodeApi';
+
+const INDUSTRIES = [
+  'Agriculture',
+  'Manufacturing',
+  'Construction',
+  'Retail Trade',
+  'Wholesale Trade',
+  'Transportation & Logistics',
+  'Education',
+  'Healthcare',
+  'Finance & Insurance',
+  'Information Technology & Services',
+  'Professional & Business Services',
+  'Hospitality & Tourism'
+];
 
 interface CreateCompanyModalProps {
   isOpen: boolean;
@@ -29,7 +44,8 @@ export default function CreateCompanyModal({
     },
     company_website: '',
     gstNumber: '',
-    fiscalYear: ''
+    fiscalYear: '',
+    industry: ''
   });
   
   const [fiscalStartYear, setFiscalStartYear] = useState<string>('');
@@ -230,7 +246,8 @@ export default function CreateCompanyModal({
         },
         company_website: '',
         gstNumber: '',
-        fiscalYear: ''
+        fiscalYear: '',
+        industry: ''
       });
       setFiscalStartYear('');
       setFiscalEndYear('');
@@ -364,6 +381,31 @@ export default function CreateCompanyModal({
               />
               {errors.gstNumber && (
                 <p className="mt-1 text-sm text-red-600">{errors.gstNumber}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Briefcase className="inline mr-1" size={16} />
+                Industry *
+              </label>
+              <select
+                value={formData.industry}
+                onChange={(e) => handleInputChange('industry', e.target.value)}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.industry ? 'border-red-300' : 'border-gray-300'
+                }`}
+                disabled={loading}
+              >
+                <option value="">Select Industry</option>
+                {INDUSTRIES.map((industry) => (
+                  <option key={industry} value={industry}>
+                    {industry}
+                  </option>
+                ))}
+              </select>
+              {errors.industry && (
+                <p className="mt-1 text-sm text-red-600">{errors.industry}</p>
               )}
             </div>
 
