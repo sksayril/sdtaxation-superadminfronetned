@@ -43,6 +43,7 @@ export interface CreateCompanyRequest {
   gstNumber?: string;
   fiscalYear?: string; // Format: YYYY-YYYY
   industry?: string;
+  constitution_of_business?: string; // Optional, max 500 characters
 }
 
 export interface Company {
@@ -413,6 +414,10 @@ class ApiService {
     
     if (companyData.industry) {
       formData.append('industry', companyData.industry);
+    }
+    
+    if (companyData.constitution_of_business) {
+      formData.append('constitution_of_business', companyData.constitution_of_business);
     }
     
     // Use custom request for FormData (don't set Content-Type header)

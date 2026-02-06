@@ -7,7 +7,9 @@ import NotificationContainer from './components/NotificationContainer';
 import { setNotificationContext } from './utils/toast';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Setup from './pages/Setup';
 import Company from './pages/Company';
+import Users from './pages/Users';
 import AdminManagement from './pages/AdminManagement';
 import CRM from './pages/CRM';
 import ERP from './pages/ERP';
@@ -67,9 +69,19 @@ function AppContent() {
               <Dashboard />
             </ProtectedRoute>
           } />
+          <Route path="/setup" element={
+            <ProtectedRoute>
+              <Setup />
+            </ProtectedRoute>
+          } />
           <Route path="/company" element={
             <ProtectedRoute>
               <Company />
+            </ProtectedRoute>
+          } />
+          <Route path="/users" element={
+            <ProtectedRoute>
+              <Users />
             </ProtectedRoute>
           } />
           <Route path="/admin-management" element={

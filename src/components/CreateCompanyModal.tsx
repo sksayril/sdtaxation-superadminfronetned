@@ -18,6 +18,25 @@ const INDUSTRIES = [
   'Hospitality & Tourism'
 ];
 
+const CONSTITUTION_OF_BUSINESS = [
+  'Select',
+  'Foreign Company',
+  'Foreign Limited Liability Partnership',
+  'Government Department',
+  'Hindu Undivided Family',
+  'Limited Liability Partnership',
+  'Local Authority',
+  'Others',
+  'Partnership',
+  'Private Limited Company',
+  'Proprietorship',
+  'Public Limited Company',
+  'Public Sector Undertaking',
+  'Society/ Club/ Trust/ AOP',
+  'Statutory Body',
+  'Unlimited Company'
+];
+
 interface CreateCompanyModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -45,11 +64,13 @@ export default function CreateCompanyModal({
     company_website: '',
     gstNumber: '',
     fiscalYear: '',
-    industry: ''
+    industry: '',
+    constitution_of_business: ''
   });
   
   const [fiscalStartYear, setFiscalStartYear] = useState<string>('');
   const [fiscalEndYear, setFiscalEndYear] = useState<string>('');
+  const [isActive, setIsActive] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pincodeLoading, setPincodeLoading] = useState(false);
@@ -134,6 +155,20 @@ export default function CreateCompanyModal({
       }));
     }
     
+    // If industry is changed to "Education", disable GST
+    if (field === 'industry' && value === 'Education') {
+      setIsActive(false);
+      setFormData(prev => ({
+        ...prev,
+        gstNumber: ''
+      }));
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.gstNumber;
+        return newErrors;
+      });
+    }
+    
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -198,8 +233,11 @@ export default function CreateCompanyModal({
       newErrors['address.zipCode'] = 'ZIP code is required';
     }
 
-    // Validate GST number format if provided (15 characters, alphanumeric)
-    if (formData.gstNumber && formData.gstNumber.trim()) {
+    // Validate GST number format if provided and active (15 characters, alphanumeric)
+    // GST is not allowed for Education industry
+    if (formData.industry === 'Education' && isActive) {
+      newErrors.gstNumber = 'GST is not applicable for Education industry';
+    } else if (isActive && formData.gstNumber && formData.gstNumber.trim()) {
       const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
       if (!gstRegex.test(formData.gstNumber.trim().toUpperCase())) {
         newErrors.gstNumber = 'Please enter a valid GST number (15 characters, alphanumeric)';
@@ -216,6 +254,13 @@ export default function CreateCompanyModal({
         if (end !== start + 1) {
           newErrors.fiscalYear = 'End year must be start year + 1 (e.g., 2024-2025)';
         }
+      }
+    }
+
+    // Validate constitution of business if provided (max 500 characters)
+    if (formData.constitution_of_business && formData.constitution_of_business.trim()) {
+      if (formData.constitution_of_business.trim().length > 500) {
+        newErrors.constitution_of_business = 'Constitution of business must not exceed 500 characters';
       }
     }
 
@@ -247,10 +292,12 @@ export default function CreateCompanyModal({
         company_website: '',
         gstNumber: '',
         fiscalYear: '',
-        industry: ''
+        industry: '',
+        constitution_of_business: ''
       });
       setFiscalStartYear('');
       setFiscalEndYear('');
+      setIsActive(false);
       setErrors({});
     } catch (error) {
       console.error('Form submission error:', error);
@@ -364,49 +411,115 @@ export default function CreateCompanyModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FileText className="inline mr-1" size={16} />
-                GST Number (Optional)
-              </label>
-              <input
-                type="text"
-                value={formData.gstNumber}
-                onChange={(e) => handleInputChange('gstNumber', e.target.value.toUpperCase())}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.gstNumber ? 'border-red-300' : 'border-gray-300'
-                }`}
-                placeholder="15-digit GST number"
-                maxLength={15}
-                disabled={loading}
-              />
-              {errors.gstNumber && (
-                <p className="mt-1 text-sm text-red-600">{errors.gstNumber}</p>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Active
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsActive(!isActive);
+                    if (isActive) {
+                      // Clear GST number when deactivating
+                      setFormData(prev => ({ ...prev, gstNumber: '' }));
+                      setErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.gstNumber;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    isActive ? 'bg-green-600' : 'bg-gray-300'
+                  } ${formData.industry === 'Education' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={loading || formData.industry === 'Education'}
+                  title={formData.industry === 'Education' ? 'GST is not applicable for Education industry' : ''}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isActive ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mb-3">
+                <b>If GST applicable</b>
+                {formData.industry === 'Education' && (
+                  <span className="text-red-500 ml-2">(Not applicable for Education industry)</span>
+                )}
+              </p>
+              {isActive && formData.industry !== 'Education' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <FileText className="inline mr-1" size={16} />
+                    GST Number (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.gstNumber}
+                    onChange={(e) => handleInputChange('gstNumber', e.target.value.toUpperCase())}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.gstNumber ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                    placeholder="15-digit GST number"
+                    maxLength={15}
+                    disabled={loading}
+                  />
+                  {errors.gstNumber && (
+                    <p className="mt-1 text-sm text-red-600">{errors.gstNumber}</p>
+                  )}
+                </div>
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Briefcase className="inline mr-1" size={16} />
-                Industry *
-              </label>
-              <select
-                value={formData.industry}
-                onChange={(e) => handleInputChange('industry', e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.industry ? 'border-red-300' : 'border-gray-300'
-                }`}
-                disabled={loading}
-              >
-                <option value="">Select Industry</option>
-                {INDUSTRIES.map((industry) => (
-                  <option key={industry} value={industry}>
-                    {industry}
-                  </option>
-                ))}
-              </select>
-              {errors.industry && (
-                <p className="mt-1 text-sm text-red-600">{errors.industry}</p>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Briefcase className="inline mr-1" size={16} />
+                  Industry *
+                </label>
+                <select
+                  value={formData.industry}
+                  onChange={(e) => handleInputChange('industry', e.target.value)}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.industry ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  <option value="">Select Industry</option>
+                  {INDUSTRIES.map((industry) => (
+                    <option key={industry} value={industry}>
+                      {industry}
+                    </option>
+                  ))}
+                </select>
+                {errors.industry && (
+                  <p className="mt-1 text-sm text-red-600">{errors.industry}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Constitution of Business <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.constitution_of_business || ''}
+                  onChange={(e) => handleInputChange('constitution_of_business', e.target.value)}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.constitution_of_business ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  {CONSTITUTION_OF_BUSINESS.map((constitution) => (
+                    <option key={constitution} value={constitution === 'Select' ? '' : constitution}>
+                      {constitution}
+                    </option>
+                  ))}
+                </select>
+                {errors.constitution_of_business && (
+                  <p className="mt-1 text-sm text-red-600">{errors.constitution_of_business}</p>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

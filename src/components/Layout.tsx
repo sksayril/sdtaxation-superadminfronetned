@@ -29,7 +29,18 @@ import {
   Shield,
   CreditCard,
   Lock,
-  CheckSquare
+  CheckSquare,
+  Palette,
+  UserCircle,
+  Wrench,
+  Search,
+  Plus,
+  Bell,
+  ShoppingCart,
+  Wallet,
+  BookOpen,
+  Book,
+  Package2
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -39,13 +50,15 @@ interface LayoutProps {
 
 export default function Layout({ children, title }: LayoutProps) {
   const { user, logout } = useAuth();
-  const { theme } = useTheme();
+  const { theme, setTheme, availableThemes } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  const [selectedYear, setSelectedYear] = useState('2025 - 26');
   const userDropdownRef = useRef<HTMLDivElement>(null);
   
   // Get active menu item classes based on theme
@@ -80,6 +93,32 @@ export default function Layout({ children, title }: LayoutProps) {
       return iconColorMap[theme.name] || iconColorMap.blue;
     }
     return 'text-white';
+  };
+
+  // Get dropdown menu item classes based on theme
+  const getDropdownItemClasses = () => {
+    const itemClassMap: Record<string, string> = {
+      blue: 'text-gray-700 hover:bg-blue-50 hover:text-blue-600',
+      purple: 'text-gray-700 hover:bg-purple-50 hover:text-purple-600',
+      green: 'text-gray-700 hover:bg-green-50 hover:text-green-600',
+      orange: 'text-gray-700 hover:bg-orange-50 hover:text-orange-600',
+      red: 'text-gray-700 hover:bg-red-50 hover:text-red-600',
+      indigo: 'text-gray-700 hover:bg-indigo-50 hover:text-indigo-600',
+    };
+    return itemClassMap[theme.name] || itemClassMap.blue;
+  };
+
+  // Get dropdown icon color classes based on theme
+  const getDropdownIconClasses = () => {
+    const iconClassMap: Record<string, string> = {
+      blue: 'text-blue-600',
+      purple: 'text-purple-600',
+      green: 'text-green-600',
+      orange: 'text-orange-600',
+      red: 'text-red-600',
+      indigo: 'text-indigo-600',
+    };
+    return iconClassMap[theme.name] || iconClassMap.blue;
   };
   
   // Get sidebar header gradient classes
@@ -167,7 +206,9 @@ export default function Layout({ children, title }: LayoutProps) {
 
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
+    { path: '/setup', label: 'Setup', icon: Wrench },
     { path: '/company', label: 'Company', icon: Building2 },
+    { path: '/users', label: 'Users', icon: UserCircle },
     { path: '/admin-management', label: 'Admin Management', icon: Shield },
     { path: '/subscription-plans', label: 'Subscription Plans', icon: Package },
     { path: '/company-subscriptions', label: 'Company Subscriptions', icon: CreditCard },
@@ -219,7 +260,7 @@ export default function Layout({ children, title }: LayoutProps) {
 
         <div className="flex-1 px-2 py-6 overflow-y-auto overflow-x-hidden min-h-0">
           <nav className="space-y-2">
-            <div className="pb-4">
+            <div className="pb-2">
               {sidebarOpen && (
                 <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
                   Main Menu
@@ -250,7 +291,7 @@ export default function Layout({ children, title }: LayoutProps) {
               })}
             </div>
 
-            <div className="pt-4 border-t border-white border-opacity-20">
+            <div className="pt-2 border-t border-white border-opacity-20">
               {sidebarOpen && (
                 <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
                   TAX MODULES
@@ -355,23 +396,25 @@ export default function Layout({ children, title }: LayoutProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden text-gray-500 hover:text-gray-700"
-              >
-                <Menu size={24} />
-              </button>
-              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Calendar size={16} />
-                <span>{new Date().toLocaleDateString()}</span>
+          <div className="flex flex-col space-y-3 px-6 py-4">
+            {/* Top Row: Title and User Info */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setMobileMenuOpen(true)}
+                  className="lg:hidden text-gray-500 hover:text-gray-700"
+                >
+                  <Menu size={24} />
+                </button>
+                <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
               </div>
-              <div className="flex items-center space-x-3 relative" ref={userDropdownRef}>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Calendar size={16} />
+                  <span>{new Date().toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center space-x-3 relative" ref={userDropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
@@ -399,9 +442,9 @@ export default function Layout({ children, title }: LayoutProps) {
                           navigate('/profile');
                           setUserDropdownOpen(false);
                         }}
-                        className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className={`w-full flex items-center space-x-3 px-4 py-3 text-sm transition-colors ${getDropdownItemClasses()}`}
                       >
-                        <User size={16} className="text-gray-500" />
+                        <User size={16} className={getDropdownIconClasses()} />
                         <span className="font-bold">My Profile</span>
                       </button>
                       <button
@@ -410,22 +453,65 @@ export default function Layout({ children, title }: LayoutProps) {
                           setUserDropdownOpen(false);
                           // Add change password functionality here
                         }}
-                        className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className={`w-full flex items-center space-x-3 px-4 py-3 text-sm transition-colors ${getDropdownItemClasses()}`}
                       >
-                        <Lock size={16} className="text-gray-500" />
+                        <Lock size={16} className={getDropdownIconClasses()} />
                         <span className="font-bold">Change Password</span>
                       </button>
-                      <button
-                        onClick={() => {
-                          // Navigate to DSC registration/update page
-                          setUserDropdownOpen(false);
-                          // Add DSC functionality here
-                        }}
-                        className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        <CheckSquare size={16} className="text-gray-500" />
-                        <span className="font-bold">Register / Update DSC</span>
-                      </button>
+                      <div className="relative">
+                        <button
+                          onClick={() => setThemeMenuOpen(!themeMenuOpen)}
+                          className={`w-full flex items-center justify-between px-4 py-3 text-sm transition-colors ${getDropdownItemClasses()}`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Palette size={16} className={getDropdownIconClasses()} />
+                            <span className="font-bold">Theme Settings</span>
+                          </div>
+                          <ChevronDown 
+                            size={16} 
+                            className={`text-gray-500 transition-transform duration-200 ${
+                              themeMenuOpen ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </button>
+                        {themeMenuOpen && (
+                          <div className="pl-4 pr-2 py-2 space-y-1">
+                            {availableThemes.map((themeOption) => (
+                              <button
+                                key={themeOption.name}
+                                onClick={() => {
+                                  setTheme(themeOption.name);
+                                  setThemeMenuOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
+                                  theme.name === themeOption.name
+                                    ? getDropdownItemClasses()
+                                    : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <div 
+                                    className={`w-4 h-4 rounded-full ${
+                                      themeOption.name === 'blue' ? 'bg-blue-600' :
+                                      themeOption.name === 'purple' ? 'bg-purple-600' :
+                                      themeOption.name === 'green' ? 'bg-green-600' :
+                                      themeOption.name === 'orange' ? 'bg-orange-600' :
+                                      themeOption.name === 'red' ? 'bg-red-600' :
+                                      'bg-indigo-600'
+                                    }`}
+                                  />
+                                  <span className="font-medium">{themeOption.displayName}</span>
+                                </div>
+                                {theme.name === themeOption.name && (
+                                  <div className={getDropdownIconClasses()}>
+                                    <CheckSquare size={14} />
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <button
                         onClick={() => {
                           setUserDropdownOpen(false);
@@ -439,7 +525,79 @@ export default function Layout({ children, title }: LayoutProps) {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
+            </div>
+
+            {/* Bottom Row: Shortcut Actions */}
+            <div className="flex items-center space-x-2 overflow-x-auto pb-1">
+              {/* Search Button */}
+              <button className="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors whitespace-nowrap">
+                <Search className={`${getDropdownIconClasses()}`} size={18} />
+              </button>
+
+              {/* Year Dropdown */}
+              <button 
+                onClick={() => {
+                  // Year dropdown functionality can be added here
+                  const years = ['2024 - 25', '2025 - 26', '2026 - 27'];
+                  const currentIndex = years.indexOf(selectedYear);
+                  const nextIndex = (currentIndex + 1) % years.length;
+                  setSelectedYear(years[nextIndex]);
+                }}
+                className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
+              >
+                <span className="text-sm text-gray-700">{selectedYear}</span>
+                <ChevronDown size={16} className="text-gray-500" />
+              </button>
+
+              {/* Action Buttons */}
+              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
+                <ShoppingCart size={16} />
+                <span>Sale</span>
+                <Plus size={16} />
+              </button>
+
+              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
+                <Package2 size={16} />
+                <span>Purchase</span>
+                <Plus size={16} />
+              </button>
+
+              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
+                <Receipt size={16} />
+                <span>Receipt</span>
+                <Plus size={16} />
+              </button>
+
+              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
+                <Wallet size={16} />
+                <span>Payment</span>
+                <Plus size={16} />
+              </button>
+
+              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
+                <BookOpen size={16} />
+                <span>Journal</span>
+                <Plus size={16} />
+              </button>
+
+              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
+                <Book size={16} />
+                <span>Ledger</span>
+                <Plus size={16} />
+              </button>
+
+              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
+                <Package size={16} />
+                <span>Item</span>
+                <Plus size={16} />
+              </button>
+
+              {/* Notification Bell */}
+              <button className={`flex items-center justify-center px-3 py-2 rounded-lg text-white transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
+                <Bell size={18} />
+              </button>
             </div>
           </div>
         </header>
