@@ -8,6 +8,11 @@ import { setNotificationContext } from './utils/toast';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Setup from './pages/Setup';
+import SetupConfiguration from './pages/SetupConfiguration';
+import DownloadSetup from './pages/DownloadSetup';
+import BackupData from './pages/BackupData';
+import SplitFinancialYear from './pages/SplitFinancialYear';
+import VersionUpdates from './pages/VersionUpdates';
 import Company from './pages/Company';
 import Users from './pages/Users';
 import AdminManagement from './pages/AdminManagement';
@@ -72,6 +77,31 @@ function AppContent() {
           <Route path="/setup" element={
             <ProtectedRoute>
               <Setup />
+            </ProtectedRoute>
+          } />
+          <Route path="/setup/configuration" element={
+            <ProtectedRoute>
+              <SetupConfiguration />
+            </ProtectedRoute>
+          } />
+          <Route path="/setup/download" element={
+            <ProtectedRoute>
+              <DownloadSetup />
+            </ProtectedRoute>
+          } />
+          <Route path="/setup/backup" element={
+            <ProtectedRoute>
+              <BackupData />
+            </ProtectedRoute>
+          } />
+          <Route path="/setup/split-financial-year" element={
+            <ProtectedRoute>
+              <SplitFinancialYear />
+            </ProtectedRoute>
+          } />
+          <Route path="/setup/version-updates" element={
+            <ProtectedRoute>
+              <VersionUpdates />
             </ProtectedRoute>
           } />
           <Route path="/company" element={

@@ -1,8 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { Wrench, Database, Server, Key, Globe, Shield } from 'lucide-react';
+import { Wrench, Download, HardDrive, Calendar, RefreshCw } from 'lucide-react';
 
 export default function Setup() {
+  const navigate = useNavigate();
+
   return (
     <Layout title="Setup">
       <div className="space-y-6">
@@ -19,99 +22,98 @@ export default function Setup() {
 
         {/* Setup Options Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Database Configuration */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+          {/* Setup */}
+          <div 
+            onClick={() => navigate('/setup/configuration')}
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
             <div className="flex items-center space-x-4 mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <Database className="text-blue-600" size={24} />
+                <Wrench className="text-blue-600" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Database</h3>
-                <p className="text-sm text-gray-500">Database settings</p>
+                <h3 className="text-lg font-semibold text-gray-900">Setup</h3>
+                <p className="text-sm text-gray-500">System setup</p>
               </div>
             </div>
             <p className="text-sm text-gray-600">
-              Configure database connections and manage data storage settings.
+              Configure initial system settings and application preferences.
             </p>
           </div>
 
-          {/* Server Configuration */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+          {/* Download Setup */}
+          <div 
+            onClick={() => navigate('/setup/download')}
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
             <div className="flex items-center space-x-4 mb-4">
               <div className="p-3 bg-green-100 rounded-lg">
-                <Server className="text-green-600" size={24} />
+                <Download className="text-green-600" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Server</h3>
-                <p className="text-sm text-gray-500">Server configuration</p>
+                <h3 className="text-lg font-semibold text-gray-900">Download Setup</h3>
+                <p className="text-sm text-gray-500">Download configuration</p>
               </div>
             </div>
             <p className="text-sm text-gray-600">
-              Manage server settings, ports, and network configurations.
+              Download system setup files and configuration packages.
             </p>
           </div>
 
-          {/* API Keys */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+          {/* Backup Data */}
+          <div 
+            onClick={() => navigate('/setup/backup')}
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
             <div className="flex items-center space-x-4 mb-4">
               <div className="p-3 bg-purple-100 rounded-lg">
-                <Key className="text-purple-600" size={24} />
+                <HardDrive className="text-purple-600" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">API Keys</h3>
-                <p className="text-sm text-gray-500">API configuration</p>
+                <h3 className="text-lg font-semibold text-gray-900">Backup Data</h3>
+                <p className="text-sm text-gray-500">Data backup</p>
               </div>
             </div>
             <p className="text-sm text-gray-600">
-              Manage API keys and third-party service integrations.
+              Create and manage data backups to ensure data safety and recovery.
             </p>
           </div>
 
-          {/* Domain Settings */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+          {/* Split Financial Year */}
+          <div 
+            onClick={() => navigate('/setup/split-financial-year')}
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
             <div className="flex items-center space-x-4 mb-4">
               <div className="p-3 bg-orange-100 rounded-lg">
-                <Globe className="text-orange-600" size={24} />
+                <Calendar className="text-orange-600" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Domain</h3>
-                <p className="text-sm text-gray-500">Domain settings</p>
+                <h3 className="text-lg font-semibold text-gray-900">Split Financial Year</h3>
+                <p className="text-sm text-gray-500">Financial year management</p>
               </div>
             </div>
             <p className="text-sm text-gray-600">
-              Configure domain names, SSL certificates, and DNS settings.
+              Split and manage financial year periods for accounting and reporting.
             </p>
           </div>
 
-          {/* Security Settings */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="p-3 bg-red-100 rounded-lg">
-                <Shield className="text-red-600" size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Security</h3>
-                <p className="text-sm text-gray-500">Security configuration</p>
-              </div>
-            </div>
-            <p className="text-sm text-gray-600">
-              Manage security policies, authentication, and access controls.
-            </p>
-          </div>
-
-          {/* System Settings */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+          {/* Version Updates */}
+          <div 
+            onClick={() => navigate('/setup/version-updates')}
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
             <div className="flex items-center space-x-4 mb-4">
               <div className="p-3 bg-indigo-100 rounded-lg">
-                <Wrench className="text-indigo-600" size={24} />
+                <RefreshCw className="text-indigo-600" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">System</h3>
-                <p className="text-sm text-gray-500">System preferences</p>
+                <h3 className="text-lg font-semibold text-gray-900">Version Updates</h3>
+                <p className="text-sm text-gray-500">System updates</p>
               </div>
             </div>
             <p className="text-sm text-gray-600">
-              Configure system-wide settings and application preferences.
+              Check for and manage system version updates and patches.
             </p>
           </div>
         </div>
