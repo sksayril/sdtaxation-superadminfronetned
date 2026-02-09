@@ -44,6 +44,7 @@ export interface CreateCompanyRequest {
   fiscalYear?: string; // Format: YYYY-YYYY
   industry?: string;
   constitution_of_business?: string; // Optional, max 500 characters
+  tdsApplicable?: boolean; // TDS Applicable toggle
 }
 
 export interface Company {
@@ -57,6 +58,7 @@ export interface Company {
   gstNumber?: string;
   fiscalYear?: string;
   industry?: string;
+  tdsApplicable?: boolean; // TDS Applicable toggle
   status: string;
   created_by: {
     _id: string;
@@ -73,6 +75,19 @@ export interface CompaniesResponse {
   message: string;
   data: Company[];
   count: number;
+}
+
+export interface FilterCompaniesRequest {
+  company_id?: string;
+  status?: 'active' | 'inactive' | 'suspended';
+}
+
+export interface FilterCompaniesResponse {
+  success: boolean;
+  message: string;
+  data: Company[];
+  count: number;
+  filter?: string;
 }
 
 export interface CreateCompanyResponse {
@@ -94,6 +109,11 @@ export interface UpdateCompanyRequest {
   company_address: CompanyAddress;
   company_website?: string;
   company_logo?: string;
+  gstNumber?: string;
+  fiscalYear?: string;
+  industry?: string;
+  tdsApplicable?: boolean; // TDS Applicable toggle
+  status?: 'active' | 'inactive' | 'suspended'; // Company status
 }
 
 export interface UpdateCompanyResponse {
@@ -387,6 +407,26 @@ class ApiService {
     return this.request<CompaniesResponse>('/api/companies');
   }
 
+  /**
+   * Filter companies by company_id and/or status
+   * POST /api/companies/filter
+   * 
+   * @param filterData - Filter request with optional company_id and/or status fields
+   * @returns Filtered companies response
+   * 
+   * Usage Examples:
+   * - Filter by status: { status: 'active' | 'inactive' | 'suspended' }
+   * - Filter by company_id: { company_id: '68f210dae0021a8a2431defc' }
+   * - Filter by both: { company_id: '68f210dae0021a8a2431defc', status: 'inactive' }
+   * - Get all companies: {}
+   */
+  async filterCompanies(filterData: FilterCompaniesRequest): Promise<FilterCompaniesResponse> {
+    return this.request<FilterCompaniesResponse>('/api/companies/filter', {
+      method: 'POST',
+      body: JSON.stringify(filterData),
+    });
+  }
+
   async createCompany(companyData: CreateCompanyRequest): Promise<CreateCompanyResponse> {
     // Create FormData for multipart/form-data
     const formData = new FormData();
@@ -464,6 +504,28 @@ class ApiService {
     return this.request<UpdateCompanyResponse>(`/api/companies/${companyId}`, {
       method: 'POST',
       body: JSON.stringify(companyData),
+    });
+  }
+
+  /**
+   * Update company status (active/inactive/suspended)
+   * Uses POST /api/companies/filter with company_id and status
+   * 
+   * @param companyId - Company ID
+   * @param status - New status: 'active' | 'inactive' | 'suspended'
+   * @returns Filtered companies response (should contain the updated company)
+   * 
+   * Example:
+   * POST /api/companies/filter
+   * Body: { "company_id": "68f210dae0021a8a2431defc", "status": "inactive" }
+   */
+  async updateCompanyStatus(companyId: string, status: 'active' | 'inactive' | 'suspended'): Promise<FilterCompaniesResponse> {
+    return this.request<FilterCompaniesResponse>('/api/companies/filter', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        company_id: companyId,
+        status: status 
+      }),
     });
   }
 

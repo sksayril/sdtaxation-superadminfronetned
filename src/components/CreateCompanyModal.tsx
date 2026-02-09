@@ -71,6 +71,7 @@ export default function CreateCompanyModal({
   const [fiscalStartYear, setFiscalStartYear] = useState<string>('');
   const [fiscalEndYear, setFiscalEndYear] = useState<string>('');
   const [isActive, setIsActive] = useState<boolean>(false);
+  const [isTdsApplicable, setIsTdsApplicable] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pincodeLoading, setPincodeLoading] = useState(false);
@@ -276,7 +277,7 @@ export default function CreateCompanyModal({
     }
 
     try {
-      await onSubmit(formData);
+      await onSubmit({ ...formData, tdsApplicable: isTdsApplicable });
       // Reset form on success
       setFormData({
         company_name: '',
@@ -298,6 +299,7 @@ export default function CreateCompanyModal({
       setFiscalStartYear('');
       setFiscalEndYear('');
       setIsActive(false);
+      setIsTdsApplicable(false);
       setErrors({});
     } catch (error) {
       console.error('Form submission error:', error);
@@ -472,6 +474,31 @@ export default function CreateCompanyModal({
               )}
             </div>
 
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  TDS Applicable
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsTdsApplicable(!isTdsApplicable)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    isTdsApplicable ? 'bg-green-600' : 'bg-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isTdsApplicable ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                <b>If TDS (Tax Deducted at Source) is applicable for this company</b>
+              </p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -537,8 +564,8 @@ export default function CreateCompanyModal({
                   disabled={loading}
                 >
                   <option value="">Select Start Year</option>
-                  {Array.from({ length: 20 }, (_, i) => {
-                    const year = new Date().getFullYear() - 5 + i;
+                  {Array.from({ length: 100 }, (_, i) => {
+                    const year = 2000 + i;
                     return (
                       <option key={year} value={year.toString()}>
                         {year}
@@ -562,15 +589,18 @@ export default function CreateCompanyModal({
                   disabled={loading || !fiscalStartYear}
                 >
                   <option value="">Select End Year</option>
-                  {fiscalStartYear && Array.from({ length: 5 }, (_, i) => {
+                  {fiscalStartYear && (() => {
                     const startYear = parseInt(fiscalStartYear);
-                    const year = startYear + 1 + i;
-                    return (
+                    const years = [];
+                    for (let year = startYear + 1; year <= 2099; year++) {
+                      years.push(year);
+                    }
+                    return years.map((year) => (
                       <option key={year} value={year.toString()}>
                         {year}
                       </option>
-                    );
-                  })}
+                    ));
+                  })()}
                 </select>
                 {fiscalStartYear && fiscalEndYear && (
                   <p className="mt-1 text-xs text-gray-500">

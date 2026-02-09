@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { AlertCircle, Loader2, ExternalLink } from 'lucide-react';
+import { AlertCircle, Loader2, ExternalLink, Shield, User, Users } from 'lucide-react';
+
+type LoginType = 'superadmin' | 'employee' | 'hr';
 
 export default function Login() {
+  const [loginType, setLoginType] = useState<LoginType>('superadmin');
   const [email, setEmail] = useState('superadmin@gmail.com');
   const [password, setPassword] = useState('superadmin@123');
   const [rememberMe, setRememberMe] = useState(false);
@@ -17,6 +20,24 @@ export default function Login() {
       navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
+
+  // Update default credentials based on login type
+  useEffect(() => {
+    switch (loginType) {
+      case 'superadmin':
+        setEmail('superadmin@gmail.com');
+        setPassword('superadmin@123');
+        break;
+      case 'employee':
+        setEmail('employee@gmail.com');
+        setPassword('employee@123');
+        break;
+      case 'hr':
+        setEmail('hr@gmail.com');
+        setPassword('hr@123');
+        break;
+    }
+  }, [loginType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +97,89 @@ export default function Login() {
                 <span className="text-red-700 text-sm">{displayError}</span>
               </div>
             )}
+
+            {/* Login Type Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Login Type
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {/* Superadmin Login */}
+                <label
+                  className={`relative flex flex-col items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    loginType === 'superadmin'
+                      ? 'border-blue-600 bg-blue-50'
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="loginType"
+                    value="superadmin"
+                    checked={loginType === 'superadmin'}
+                    onChange={(e) => setLoginType(e.target.value as LoginType)}
+                    className="sr-only"
+                  />
+                  <Shield className={`mb-2 ${loginType === 'superadmin' ? 'text-blue-600' : 'text-gray-400'}`} size={24} />
+                  <span className={`text-xs font-medium ${loginType === 'superadmin' ? 'text-blue-600' : 'text-gray-600'}`}>
+                    Superadmin
+                  </span>
+                  {loginType === 'superadmin' && (
+                    <div className="absolute top-2 right-2 w-3 h-3 bg-blue-600 rounded-full"></div>
+                  )}
+                </label>
+
+                {/* Employee Login */}
+                <label
+                  className={`relative flex flex-col items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    loginType === 'employee'
+                      ? 'border-blue-600 bg-blue-50'
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="loginType"
+                    value="employee"
+                    checked={loginType === 'employee'}
+                    onChange={(e) => setLoginType(e.target.value as LoginType)}
+                    className="sr-only"
+                  />
+                  <User className={`mb-2 ${loginType === 'employee' ? 'text-blue-600' : 'text-gray-400'}`} size={24} />
+                  <span className={`text-xs font-medium ${loginType === 'employee' ? 'text-blue-600' : 'text-gray-600'}`}>
+                    Employee
+                  </span>
+                  {loginType === 'employee' && (
+                    <div className="absolute top-2 right-2 w-3 h-3 bg-blue-600 rounded-full"></div>
+                  )}
+                </label>
+
+                {/* HR Login */}
+                <label
+                  className={`relative flex flex-col items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    loginType === 'hr'
+                      ? 'border-blue-600 bg-blue-50'
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="loginType"
+                    value="hr"
+                    checked={loginType === 'hr'}
+                    onChange={(e) => setLoginType(e.target.value as LoginType)}
+                    className="sr-only"
+                  />
+                  <Users className={`mb-2 ${loginType === 'hr' ? 'text-blue-600' : 'text-gray-400'}`} size={24} />
+                  <span className={`text-xs font-medium ${loginType === 'hr' ? 'text-blue-600' : 'text-gray-600'}`}>
+                    HR Login
+                  </span>
+                  {loginType === 'hr' && (
+                    <div className="absolute top-2 right-2 w-3 h-3 bg-blue-600 rounded-full"></div>
+                  )}
+                </label>
+              </div>
+            </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">

@@ -1,10 +1,10 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import { useTheme } from '../contexts/ThemeContext';
-import { Palette, Check } from 'lucide-react';
+import { Palette, Check, Moon, Sun } from 'lucide-react';
 
 export default function Settings() {
-  const { theme, themeName, setTheme, availableThemes } = useTheme();
+  const { theme, themeName, setTheme, availableThemes, isDarkMode, toggleDarkMode } = useTheme();
 
   const getThemeColorClass = (themeName: string) => {
     const colorMap: Record<string, string> = {
@@ -69,15 +69,48 @@ export default function Settings() {
   return (
     <Layout title="Settings">
       <div className="space-y-6">
+        {/* Dark Mode Toggle */}
+        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 ${getThemeBorderClass(themeName)}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className={`p-2 rounded-lg ${getThemeLightClass(themeName)} dark:bg-gray-700`}>
+                {isDarkMode ? (
+                  <Moon className={getThemeTextClass(themeName)} size={24} />
+                ) : (
+                  <Sun className={getThemeTextClass(themeName)} size={24} />
+                )}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Dark Mode</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Toggle dark mode for the entire application</p>
+              </div>
+            </div>
+            <button
+              onClick={toggleDarkMode}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                isDarkMode 
+                  ? `bg-${theme.colors.primary} focus:ring-${theme.colors.primary}` 
+                  : 'bg-gray-200 focus:ring-gray-500'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isDarkMode ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
         {/* Theme Selection */}
-        <div className={`bg-white rounded-xl shadow-sm p-6 border ${getThemeBorderClass(themeName)}`}>
+        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 ${getThemeBorderClass(themeName)}`}>
           <div className="flex items-center space-x-3 mb-6">
-            <div className={`p-2 rounded-lg ${getThemeLightClass(themeName)}`}>
+            <div className={`p-2 rounded-lg ${getThemeLightClass(themeName)} dark:bg-gray-700`}>
               <Palette className={getThemeTextClass(themeName)} size={24} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Theme Settings</h2>
-              <p className="text-sm text-gray-600">Choose your preferred color theme</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Theme Settings</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Choose your preferred color theme</p>
             </div>
           </div>
 
@@ -91,8 +124,8 @@ export default function Settings() {
                   className={`
                     relative p-4 rounded-lg border-2 transition-all duration-200
                     ${isSelected 
-                      ? `${getThemeBorderActiveClass(availableTheme.name)} ${getThemeLightClass(availableTheme.name)}` 
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? `${getThemeBorderActiveClass(availableTheme.name)} ${getThemeLightClass(availableTheme.name)} dark:bg-gray-700` 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
                     }
                   `}
                 >
@@ -101,7 +134,7 @@ export default function Settings() {
                     <span className={`font-semibold text-sm ${
                       isSelected 
                         ? getThemeTextClass(availableTheme.name)
-                        : 'text-gray-700'
+                        : 'text-gray-700 dark:text-gray-300'
                     }`}>
                       {availableTheme.displayName}
                     </span>
@@ -116,20 +149,20 @@ export default function Settings() {
             })}
           </div>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">
-              <strong>Current Theme:</strong> {theme.displayName}
+          <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              <strong className="dark:text-white">Current Theme:</strong> {theme.displayName}
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               The theme will be applied to the sidebar, cards, and page elements throughout the application.
             </p>
           </div>
         </div>
 
         {/* Additional Settings Placeholder */}
-        <div className={`bg-white rounded-xl shadow-sm p-6 border ${getThemeBorderClass(themeName)}`}>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Other Settings</h2>
-          <p className="text-gray-600">More settings coming soon...</p>
+        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 ${getThemeBorderClass(themeName)}`}>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Other Settings</h2>
+          <p className="text-gray-600 dark:text-gray-400">More settings coming soon...</p>
         </div>
       </div>
     </Layout>

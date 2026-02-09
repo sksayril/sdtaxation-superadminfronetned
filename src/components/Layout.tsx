@@ -40,7 +40,9 @@ import {
   Wallet,
   BookOpen,
   Book,
-  Package2
+  Package2,
+  Moon,
+  Sun
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -50,7 +52,7 @@ interface LayoutProps {
 
 export default function Layout({ children, title }: LayoutProps) {
   const { user, logout } = useAuth();
-  const { theme, setTheme, availableThemes } = useTheme();
+  const { theme, setTheme, availableThemes, isDarkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -64,7 +66,19 @@ export default function Layout({ children, title }: LayoutProps) {
   // Get active menu item classes based on theme
   const getActiveMenuClasses = (isActive: boolean) => {
     if (!isActive) {
-      return 'text-white hover:bg-white hover:bg-opacity-10';
+      return 'text-white dark:text-gray-300 hover:bg-white hover:bg-opacity-10 dark:hover:bg-gray-700';
+    }
+    
+    if (isDarkMode) {
+      const activeClassMap: Record<string, string> = {
+        blue: 'bg-gray-700 dark:bg-gray-700 text-blue-300 dark:text-blue-400 rounded-lg',
+        purple: 'bg-gray-700 dark:bg-gray-700 text-purple-300 dark:text-purple-400 rounded-lg',
+        green: 'bg-gray-700 dark:bg-gray-700 text-green-300 dark:text-green-400 rounded-lg',
+        orange: 'bg-gray-700 dark:bg-gray-700 text-orange-300 dark:text-orange-400 rounded-lg',
+        red: 'bg-gray-700 dark:bg-gray-700 text-red-300 dark:text-red-400 rounded-lg',
+        indigo: 'bg-gray-700 dark:bg-gray-700 text-indigo-300 dark:text-indigo-400 rounded-lg',
+      };
+      return activeClassMap[theme.name] || activeClassMap.blue;
     }
     
     const activeClassMap: Record<string, string> = {
@@ -82,6 +96,17 @@ export default function Layout({ children, title }: LayoutProps) {
   // Get inactive icon color classes
   const getInactiveIconClasses = (isActive: boolean) => {
     if (isActive) {
+      if (isDarkMode) {
+        const iconColorMap: Record<string, string> = {
+          blue: 'text-blue-300 dark:text-blue-400',
+          purple: 'text-purple-300 dark:text-purple-400',
+          green: 'text-green-300 dark:text-green-400',
+          orange: 'text-orange-300 dark:text-orange-400',
+          red: 'text-red-300 dark:text-red-400',
+          indigo: 'text-indigo-300 dark:text-indigo-400',
+        };
+        return iconColorMap[theme.name] || iconColorMap.blue;
+      }
       const iconColorMap: Record<string, string> = {
         blue: 'text-blue-600',
         purple: 'text-purple-600',
@@ -92,11 +117,22 @@ export default function Layout({ children, title }: LayoutProps) {
       };
       return iconColorMap[theme.name] || iconColorMap.blue;
     }
-    return 'text-white';
+    return 'text-white dark:text-gray-300';
   };
 
   // Get dropdown menu item classes based on theme
   const getDropdownItemClasses = () => {
+    if (isDarkMode) {
+      const itemClassMap: Record<string, string> = {
+        blue: 'text-gray-300 hover:bg-blue-900 hover:text-blue-300',
+        purple: 'text-gray-300 hover:bg-purple-900 hover:text-purple-300',
+        green: 'text-gray-300 hover:bg-green-900 hover:text-green-300',
+        orange: 'text-gray-300 hover:bg-orange-900 hover:text-orange-300',
+        red: 'text-gray-300 hover:bg-red-900 hover:text-red-300',
+        indigo: 'text-gray-300 hover:bg-indigo-900 hover:text-indigo-300',
+      };
+      return itemClassMap[theme.name] || itemClassMap.blue;
+    }
     const itemClassMap: Record<string, string> = {
       blue: 'text-gray-700 hover:bg-blue-50 hover:text-blue-600',
       purple: 'text-gray-700 hover:bg-purple-50 hover:text-purple-600',
@@ -123,6 +159,9 @@ export default function Layout({ children, title }: LayoutProps) {
   
   // Get sidebar header gradient classes
   const getSidebarHeaderClasses = () => {
+    if (isDarkMode) {
+      return 'bg-gray-800 dark:bg-gray-900';
+    }
     const headerClassMap: Record<string, string> = {
       blue: 'bg-gradient-to-r from-blue-600 to-blue-700',
       purple: 'bg-gradient-to-r from-purple-600 to-purple-700',
@@ -137,6 +176,9 @@ export default function Layout({ children, title }: LayoutProps) {
 
   // Get sidebar background gradient classes
   const getSidebarBgClasses = () => {
+    if (isDarkMode) {
+      return 'bg-gray-800 dark:bg-gray-900';
+    }
     const sidebarBgMap: Record<string, string> = {
       blue: 'bg-gradient-to-b from-blue-600 to-blue-700',
       purple: 'bg-gradient-to-b from-purple-600 to-purple-700',
@@ -151,6 +193,9 @@ export default function Layout({ children, title }: LayoutProps) {
 
   // Get page background color classes
   const getPageBgClasses = () => {
+    if (isDarkMode) {
+      return 'bg-gray-900';
+    }
     const pageBgMap: Record<string, string> = {
       blue: 'bg-blue-50',
       purple: 'bg-purple-50',
@@ -239,20 +284,20 @@ export default function Layout({ children, title }: LayoutProps) {
           !sidebarOpen ? 'px-2' : ''
         }`}>
           {sidebarOpen && (
-            <h1 className="text-xl font-bold text-white truncate">S.D.Taxation</h1>
+            <h1 className="text-xl font-bold text-white dark:text-white truncate">S.D.Taxation</h1>
           )}
           {!sidebarOpen && (
-            <div className="text-white font-bold text-lg">SD</div>
+            <div className="text-white dark:text-white font-bold text-lg">SD</div>
           )}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="lg:hidden text-white hover:text-gray-200 p-1"
+            className="lg:hidden text-white dark:text-gray-300 hover:text-gray-200 dark:hover:text-white p-1"
           >
             <X size={24} />
           </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden lg:block text-white hover:text-gray-200 p-1"
+            className="hidden lg:block text-white dark:text-gray-300 hover:text-gray-200 dark:hover:text-white p-1"
           >
             {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
           </button>
@@ -262,7 +307,7 @@ export default function Layout({ children, title }: LayoutProps) {
           <nav className="space-y-2">
             <div className="pb-2">
               {sidebarOpen && (
-                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
+                <h3 className="text-xs font-semibold text-white dark:text-gray-400 text-opacity-70 dark:text-opacity-100 uppercase tracking-wider mb-3 px-2">
                   Main Menu
                 </h3>
               )}
@@ -280,7 +325,7 @@ export default function Layout({ children, title }: LayoutProps) {
                     title={!sidebarOpen ? item.label : ''}
                   >
                     <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
-                    {sidebarOpen && <span className={isActive ? '' : 'text-white'}>{item.label}</span>}
+                    {sidebarOpen && <span className={isActive ? (isDarkMode ? '' : '') : 'text-white dark:text-gray-300'}>{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -291,9 +336,9 @@ export default function Layout({ children, title }: LayoutProps) {
               })}
             </div>
 
-            <div className="pt-2 border-t border-white border-opacity-20">
+            <div className="pt-2 border-t border-white border-opacity-20 dark:border-gray-700">
               {sidebarOpen && (
-                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
+                <h3 className="text-xs font-semibold text-white dark:text-gray-400 text-opacity-70 dark:text-opacity-100 uppercase tracking-wider mb-3 px-2">
                   TAX MODULES
                 </h3>
               )}
@@ -311,7 +356,7 @@ export default function Layout({ children, title }: LayoutProps) {
                     title={!sidebarOpen ? item.label : ''}
                   >
                     <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
-                    {sidebarOpen && <span className={`font-bold ${isActive ? '' : 'text-white'}`}>{item.label}</span>}
+                    {sidebarOpen && <span className={`font-bold ${isActive ? '' : 'text-white dark:text-gray-300'}`}>{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -323,24 +368,24 @@ export default function Layout({ children, title }: LayoutProps) {
             </div>
 
             {sidebarOpen && (
-              <div className="pt-4 border-t border-white border-opacity-20">
-                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
+              <div className="pt-4 border-t border-white border-opacity-20 dark:border-gray-700">
+                <h3 className="text-xs font-semibold text-white dark:text-gray-400 text-opacity-70 dark:text-opacity-100 uppercase tracking-wider mb-3 px-2">
                   Quick Actions
                 </h3>
                 <div className="grid grid-cols-2 gap-2 px-1">
-                  <button className="flex flex-col items-center p-3 text-xs text-white bg-white bg-opacity-10 rounded-lg hover:bg-opacity-20 transition-colors">
+                  <button className="flex flex-col items-center p-3 text-xs text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors">
                     <Mail size={16} className="mb-1" />
                     <span className="font-bold">Gmail</span>
                   </button>
-                  <button className="flex flex-col items-center p-3 text-xs text-white bg-white bg-opacity-10 rounded-lg hover:bg-opacity-20 transition-colors">
+                  <button className="flex flex-col items-center p-3 text-xs text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors">
                     <Download size={16} className="mb-1" />
                     <span className="font-bold">Download</span>
                   </button>
-                  <button className="flex flex-col items-center p-3 text-xs text-white bg-white bg-opacity-10 rounded-lg hover:bg-opacity-20 transition-colors">
+                  <button className="flex flex-col items-center p-3 text-xs text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors">
                     <Globe size={16} className="mb-1" />
                     <span className="font-bold">Online</span>
                   </button>
-                  <button className="flex flex-col items-center p-3 text-xs text-white bg-white bg-opacity-10 rounded-lg hover:bg-opacity-20 transition-colors">
+                  <button className="flex flex-col items-center p-3 text-xs text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors">
                     <Receipt size={16} className="mb-1" />
                     <span className="font-bold">E-way Bill</span>
                   </button>
@@ -349,40 +394,40 @@ export default function Layout({ children, title }: LayoutProps) {
             )}
             
             {!sidebarOpen && (
-              <div className="pt-4 border-t border-gray-200 space-y-2">
+              <div className="pt-4 border-t border-white border-opacity-20 dark:border-gray-700 space-y-2">
                 <button 
-                  className="w-full flex justify-center p-2 text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group relative"
+                  className="w-full flex justify-center p-2 text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors group relative"
                   title="Gmail"
                 >
                   <Mail size={20} />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                     Gmail
                   </div>
                 </button>
                 <button 
-                  className="w-full flex justify-center p-2 text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group relative"
+                  className="w-full flex justify-center p-2 text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors group relative"
                   title="Download"
                 >
                   <Download size={20} />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                     Download
                   </div>
                 </button>
                 <button 
-                  className="w-full flex justify-center p-2 text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group relative"
+                  className="w-full flex justify-center p-2 text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors group relative"
                   title="Online"
                 >
                   <Globe size={20} />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                     Online
                   </div>
                 </button>
                 <button 
-                  className="w-full flex justify-center p-2 text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group relative"
+                  className="w-full flex justify-center p-2 text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors group relative"
                   title="E-way Bill"
                 >
                   <Receipt size={20} />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                     E-way Bill
                   </div>
                 </button>
@@ -395,35 +440,35 @@ export default function Layout({ children, title }: LayoutProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="flex flex-col space-y-3 px-6 py-4">
             {/* Top Row: Title and User Info */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setMobileMenuOpen(true)}
-                  className="lg:hidden text-gray-500 hover:text-gray-700"
+                  className="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
                   <Menu size={24} />
                 </button>
-                <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h1>
               </div>
 
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <Calendar size={16} />
                   <span>{new Date().toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center space-x-3 relative" ref={userDropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   <User size={16} />
                   <span className="lowercase">{user?.name || 'superadmin'}</span>
                   <ChevronDown 
                     size={16} 
-                    className={`text-gray-500 transition-transform duration-200 ${
+                    className={`text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                       userDropdownOpen ? 'rotate-180' : ''
                     }`}
                   />
@@ -431,10 +476,10 @@ export default function Layout({ children, title }: LayoutProps) {
                 
                 {/* User Dropdown Menu */}
                 {userDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div className="p-4 border-b border-gray-200">
-                      <div className="text-xs text-gray-500 mb-1 font-bold">Last Logged In at</div>
-                      <div className="text-sm text-gray-700 font-medium">{formatLastLogin()}</div>
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-bold">Last Logged In at</div>
+                      <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">{formatLastLogin()}</div>
                     </div>
                     <div className="py-2">
                       <button
@@ -465,17 +510,42 @@ export default function Layout({ children, title }: LayoutProps) {
                         >
                           <div className="flex items-center space-x-3">
                             <Palette size={16} className={getDropdownIconClasses()} />
-                            <span className="font-bold">Theme Settings</span>
+                            <span className="font-bold dark:text-gray-300">Theme Settings</span>
                           </div>
                           <ChevronDown 
                             size={16} 
-                            className={`text-gray-500 transition-transform duration-200 ${
+                            className={`text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                               themeMenuOpen ? 'rotate-180' : ''
                             }`}
                           />
                         </button>
                         {themeMenuOpen && (
                           <div className="pl-4 pr-2 py-2 space-y-1">
+                            {/* Dark Mode Toggle */}
+                            <button
+                              onClick={() => {
+                                toggleDarkMode();
+                              }}
+                              className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
+                                isDarkMode
+                                  ? getDropdownItemClasses()
+                                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                              }`}
+                            >
+                              <div className="flex items-center space-x-2">
+                                {isDarkMode ? (
+                                  <Moon size={16} className={getDropdownIconClasses()} />
+                                ) : (
+                                  <Sun size={16} className="text-gray-600 dark:text-gray-400" />
+                                )}
+                                <span className="font-medium dark:text-gray-300">Dark Mode</span>
+                              </div>
+                              {isDarkMode && (
+                                <div className={getDropdownIconClasses()}>
+                                  <CheckSquare size={14} />
+                                </div>
+                              )}
+                            </button>
                             {availableThemes.map((themeOption) => (
                               <button
                                 key={themeOption.name}
@@ -486,7 +556,7 @@ export default function Layout({ children, title }: LayoutProps) {
                                 className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
                                   theme.name === themeOption.name
                                     ? getDropdownItemClasses()
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                               >
                                 <div className="flex items-center space-x-2">
@@ -500,7 +570,7 @@ export default function Layout({ children, title }: LayoutProps) {
                                       'bg-indigo-600'
                                     }`}
                                   />
-                                  <span className="font-medium">{themeOption.displayName}</span>
+                                  <span className="font-medium dark:text-gray-300">{themeOption.displayName}</span>
                                 </div>
                                 {theme.name === themeOption.name && (
                                   <div className={getDropdownIconClasses()}>
@@ -532,7 +602,7 @@ export default function Layout({ children, title }: LayoutProps) {
             {/* Bottom Row: Shortcut Actions */}
             <div className="flex items-center space-x-2 overflow-x-auto pb-1">
               {/* Search Button */}
-              <button className="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors whitespace-nowrap">
+              <button className="flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap">
                 <Search className={`${getDropdownIconClasses()}`} size={18} />
               </button>
 
@@ -545,10 +615,10 @@ export default function Layout({ children, title }: LayoutProps) {
                   const nextIndex = (currentIndex + 1) % years.length;
                   setSelectedYear(years[nextIndex]);
                 }}
-                className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
+                className="flex items-center space-x-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
               >
-                <span className="text-sm text-gray-700">{selectedYear}</span>
-                <ChevronDown size={16} className="text-gray-500" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">{selectedYear}</span>
+                <ChevronDown size={16} className="text-gray-500 dark:text-gray-400" />
               </button>
 
               {/* Action Buttons */}

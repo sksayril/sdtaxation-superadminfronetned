@@ -53,6 +53,7 @@ export default function EditCompanyModal({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [isTdsApplicable, setIsTdsApplicable] = useState<boolean>(false);
   const pincodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-fill address when PIN code is entered
@@ -137,6 +138,7 @@ export default function EditCompanyModal({
         fiscalYear: company.fiscalYear || '',
         industry: company.industry || ''
       });
+      setIsTdsApplicable(company.tdsApplicable || false);
       setErrors({});
     }
   }, [company, isOpen]);
@@ -217,7 +219,7 @@ export default function EditCompanyModal({
     }
 
     try {
-      await onSubmit(company._id, formData);
+      await onSubmit(company._id, { ...formData, tdsApplicable: isTdsApplicable });
     } catch (error) {
       console.error('Form submission error:', error);
     }
@@ -352,6 +354,31 @@ export default function EditCompanyModal({
               {errors.industry && (
                 <p className="mt-1 text-sm text-red-600">{errors.industry}</p>
               )}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  TDS Applicable
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsTdsApplicable(!isTdsApplicable)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    isTdsApplicable ? 'bg-green-600' : 'bg-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isTdsApplicable ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                <b>If TDS (Tax Deducted at Source) is applicable for this company</b>
+              </p>
             </div>
           </div>
 

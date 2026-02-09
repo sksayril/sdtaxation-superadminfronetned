@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type ThemeName = 'blue' | 'purple' | 'green' | 'orange' | 'red' | 'indigo';
 
@@ -144,6 +144,8 @@ interface ThemeContextType {
   themeName: ThemeName;
   setTheme: (themeName: ThemeName) => void;
   availableThemes: Theme[];
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -155,16 +157,37 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return savedTheme && themes[savedTheme] ? savedTheme : 'blue';
   });
 
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    // Load dark mode preference from localStorage or default to false
+    const savedDarkMode = localStorage.getItem('app-dark-mode');
+    return savedDarkMode === 'true';
+  });
+
+  // Apply dark mode class to document root
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   const setTheme = (newThemeName: ThemeName) => {
     setThemeName(newThemeName);
     localStorage.setItem('app-theme', newThemeName);
+  };
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('app-dark-mode', String(newDarkMode));
   };
 
   const theme = themes[themeName];
   const availableThemes = Object.values(themes);
 
   return (
-    <ThemeContext.Provider value={{ theme, themeName, setTheme, availableThemes }}>
+    <ThemeContext.Provider value={{ theme, themeName, setTheme, availableThemes, isDarkMode, toggleDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );
