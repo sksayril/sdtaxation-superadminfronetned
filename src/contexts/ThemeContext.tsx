@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type ThemeName = 'blue' | 'purple' | 'green' | 'orange' | 'red' | 'indigo';
+export type ThemeName = 'blue' | 'purple' | 'green' | 'orange' | 'red' | 'indigo' | 'black' | 'pink' | 'teal' | 'cyan';
 
 export interface Theme {
   name: ThemeName;
@@ -137,6 +137,82 @@ const themes: Record<ThemeName, Theme> = {
       hoverBg: 'gray-50',
     },
   },
+  black: {
+    name: 'black',
+    displayName: 'Black',
+    colors: {
+      primary: 'gray-900',
+      primaryDark: 'black',
+      primaryLight: 'gray-50',
+      sidebarBg: 'from-gray-900 to-black',
+      sidebarHeader: 'from-gray-900 to-black',
+      cardBg: 'white',
+      cardBorder: 'border-gray-200',
+      pageBg: 'gray-50',
+      textPrimary: 'gray-900',
+      textSecondary: 'gray-600',
+      activeBg: 'white',
+      activeText: 'gray-900',
+      hoverBg: 'gray-50',
+    },
+  },
+  pink: {
+    name: 'pink',
+    displayName: 'Pink',
+    colors: {
+      primary: 'pink-600',
+      primaryDark: 'pink-700',
+      primaryLight: 'pink-50',
+      sidebarBg: 'from-pink-600 to-pink-700',
+      sidebarHeader: 'from-pink-600 to-pink-700',
+      cardBg: 'white',
+      cardBorder: 'border-pink-100',
+      pageBg: 'pink-50',
+      textPrimary: 'gray-900',
+      textSecondary: 'gray-600',
+      activeBg: 'white',
+      activeText: 'pink-600',
+      hoverBg: 'gray-50',
+    },
+  },
+  teal: {
+    name: 'teal',
+    displayName: 'Teal',
+    colors: {
+      primary: 'teal-600',
+      primaryDark: 'teal-700',
+      primaryLight: 'teal-50',
+      sidebarBg: 'from-teal-600 to-teal-700',
+      sidebarHeader: 'from-teal-600 to-teal-700',
+      cardBg: 'white',
+      cardBorder: 'border-teal-100',
+      pageBg: 'teal-50',
+      textPrimary: 'gray-900',
+      textSecondary: 'gray-600',
+      activeBg: 'white',
+      activeText: 'teal-600',
+      hoverBg: 'gray-50',
+    },
+  },
+  cyan: {
+    name: 'cyan',
+    displayName: 'Cyan',
+    colors: {
+      primary: 'cyan-600',
+      primaryDark: 'cyan-700',
+      primaryLight: 'cyan-50',
+      sidebarBg: 'from-cyan-600 to-cyan-700',
+      sidebarHeader: 'from-cyan-600 to-cyan-700',
+      cardBg: 'white',
+      cardBorder: 'border-cyan-100',
+      pageBg: 'cyan-50',
+      textPrimary: 'gray-900',
+      textSecondary: 'gray-600',
+      activeBg: 'white',
+      activeText: 'cyan-600',
+      hoverBg: 'gray-50',
+    },
+  },
 };
 
 interface ThemeContextType {
@@ -157,30 +233,39 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return savedTheme && themes[savedTheme] ? savedTheme : 'blue';
   });
 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    // Load dark mode preference from localStorage or default to false
-    const savedDarkMode = localStorage.getItem('app-dark-mode');
-    return savedDarkMode === 'true';
-  });
+  // Commented out dark mode functionality
+  // const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+  //   // Load dark mode preference from localStorage or default to false
+  //   const savedDarkMode = localStorage.getItem('app-dark-mode');
+  //   return savedDarkMode === 'true';
+  // });
 
   // Apply dark mode class to document root
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+  // useEffect(() => {
+  //   if (isDarkMode) {
+  //     document.documentElement.classList.add('dark');
+  //   } else {
+  //     document.documentElement.classList.remove('dark');
+  //   }
+  // }, [isDarkMode]);
+  
+  // Set isDarkMode to false (disabled)
+  const isDarkMode = false;
 
   const setTheme = (newThemeName: ThemeName) => {
     setThemeName(newThemeName);
     localStorage.setItem('app-theme', newThemeName);
   };
 
+  // Commented out dark mode toggle
+  // const toggleDarkMode = () => {
+  //   const newDarkMode = !isDarkMode;
+  //   setIsDarkMode(newDarkMode);
+  //   localStorage.setItem('app-dark-mode', String(newDarkMode));
+  // };
+  
   const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    localStorage.setItem('app-dark-mode', String(newDarkMode));
+    // Dark mode is disabled
   };
 
   const theme = themes[themeName];

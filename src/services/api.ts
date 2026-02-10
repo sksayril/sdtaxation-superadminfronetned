@@ -43,8 +43,18 @@ export interface CreateCompanyRequest {
   gstNumber?: string;
   fiscalYear?: string; // Format: YYYY-YYYY
   industry?: string;
+  industries?: string; // Optional, string format, max 500 characters
   constitution_of_business?: string; // Optional, max 500 characters
   tdsApplicable?: boolean; // TDS Applicable toggle
+  tdsNumber?: string; // Required if tdsApplicable is true
+  professional?: boolean; // Professional toggle
+  professionalNumber?: string; // Required if professional is true
+  epf?: boolean; // EPF toggle
+  epfNumber?: string; // Required if epf is true
+  pf?: boolean; // PF toggle
+  pfNumber?: string; // Required if pf is true
+  esic?: boolean; // ESIC toggle
+  esicNumber?: string; // Required if esic is true
 }
 
 export interface Company {
@@ -456,8 +466,52 @@ class ApiService {
       formData.append('industry', companyData.industry);
     }
     
+    if (companyData.industries) {
+      formData.append('industries', companyData.industries);
+    }
+    
     if (companyData.constitution_of_business) {
       formData.append('constitution_of_business', companyData.constitution_of_business);
+    }
+    
+    if (companyData.tdsApplicable !== undefined) {
+      formData.append('tdsApplicable', String(companyData.tdsApplicable));
+    }
+    
+    if (companyData.tdsNumber) {
+      formData.append('tdsNumber', companyData.tdsNumber);
+    }
+    
+    if (companyData.professional !== undefined) {
+      formData.append('professional', String(companyData.professional));
+    }
+    
+    if (companyData.professionalNumber) {
+      formData.append('professionalNumber', companyData.professionalNumber);
+    }
+    
+    if (companyData.epf !== undefined) {
+      formData.append('epf', String(companyData.epf));
+    }
+    
+    if (companyData.epfNumber) {
+      formData.append('epfNumber', companyData.epfNumber);
+    }
+    
+    if (companyData.pf !== undefined) {
+      formData.append('pf', String(companyData.pf));
+    }
+    
+    if (companyData.pfNumber) {
+      formData.append('pfNumber', companyData.pfNumber);
+    }
+    
+    if (companyData.esic !== undefined) {
+      formData.append('esic', String(companyData.esic));
+    }
+    
+    if (companyData.esicNumber) {
+      formData.append('esicNumber', companyData.esicNumber);
     }
     
     // Use custom request for FormData (don't set Content-Type header)

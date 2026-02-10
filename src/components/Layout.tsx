@@ -20,9 +20,6 @@ import {
   Menu,
   X,
   Calendar,
-  Mail,
-  Download,
-  Globe,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -36,13 +33,6 @@ import {
   Search,
   Plus,
   Bell,
-  ShoppingCart,
-  Wallet,
-  BookOpen,
-  Book,
-  Package2,
-  Moon,
-  Sun
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -52,7 +42,7 @@ interface LayoutProps {
 
 export default function Layout({ children, title }: LayoutProps) {
   const { user, logout } = useAuth();
-  const { theme, setTheme, availableThemes, isDarkMode, toggleDarkMode } = useTheme();
+  const { theme, setTheme, availableThemes } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -61,25 +51,31 @@ export default function Layout({ children, title }: LayoutProps) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState('2025 - 26');
+  const [menuClickCounts, setMenuClickCounts] = useState<Record<string, number>>(() => {
+    // Load click counts from localStorage
+    const saved = localStorage.getItem('menu-click-counts');
+    return saved ? JSON.parse(saved) : {};
+  });
   const userDropdownRef = useRef<HTMLDivElement>(null);
   
   // Get active menu item classes based on theme
   const getActiveMenuClasses = (isActive: boolean) => {
     if (!isActive) {
-      return 'text-white dark:text-gray-300 hover:bg-white hover:bg-opacity-10 dark:hover:bg-gray-700';
+      return 'text-white hover:bg-white hover:bg-opacity-10';
     }
     
-    if (isDarkMode) {
-      const activeClassMap: Record<string, string> = {
-        blue: 'bg-gray-700 dark:bg-gray-700 text-blue-300 dark:text-blue-400 rounded-lg',
-        purple: 'bg-gray-700 dark:bg-gray-700 text-purple-300 dark:text-purple-400 rounded-lg',
-        green: 'bg-gray-700 dark:bg-gray-700 text-green-300 dark:text-green-400 rounded-lg',
-        orange: 'bg-gray-700 dark:bg-gray-700 text-orange-300 dark:text-orange-400 rounded-lg',
-        red: 'bg-gray-700 dark:bg-gray-700 text-red-300 dark:text-red-400 rounded-lg',
-        indigo: 'bg-gray-700 dark:bg-gray-700 text-indigo-300 dark:text-indigo-400 rounded-lg',
-      };
-      return activeClassMap[theme.name] || activeClassMap.blue;
-    }
+    // Commented out dark mode support
+    // if (isDarkMode) {
+    //   const activeClassMap: Record<string, string> = {
+    //     blue: 'bg-gray-700 dark:bg-gray-700 text-blue-300 dark:text-blue-400 rounded-lg',
+    //     purple: 'bg-gray-700 dark:bg-gray-700 text-purple-300 dark:text-purple-400 rounded-lg',
+    //     green: 'bg-gray-700 dark:bg-gray-700 text-green-300 dark:text-green-400 rounded-lg',
+    //     orange: 'bg-gray-700 dark:bg-gray-700 text-orange-300 dark:text-orange-400 rounded-lg',
+    //     red: 'bg-gray-700 dark:bg-gray-700 text-red-300 dark:text-red-400 rounded-lg',
+    //     indigo: 'bg-gray-700 dark:bg-gray-700 text-indigo-300 dark:text-indigo-400 rounded-lg',
+    //   };
+    //   return activeClassMap[theme.name] || activeClassMap.blue;
+    // }
     
     const activeClassMap: Record<string, string> = {
       blue: 'bg-white text-blue-600 rounded-lg',
@@ -88,6 +84,10 @@ export default function Layout({ children, title }: LayoutProps) {
       orange: 'bg-white text-orange-600 rounded-lg',
       red: 'bg-white text-red-600 rounded-lg',
       indigo: 'bg-white text-indigo-600 rounded-lg',
+      black: 'bg-white text-gray-900 rounded-lg',
+      pink: 'bg-white text-pink-600 rounded-lg',
+      teal: 'bg-white text-teal-600 rounded-lg',
+      cyan: 'bg-white text-cyan-600 rounded-lg',
     };
     
     return activeClassMap[theme.name] || activeClassMap.blue;
@@ -96,17 +96,18 @@ export default function Layout({ children, title }: LayoutProps) {
   // Get inactive icon color classes
   const getInactiveIconClasses = (isActive: boolean) => {
     if (isActive) {
-      if (isDarkMode) {
-        const iconColorMap: Record<string, string> = {
-          blue: 'text-blue-300 dark:text-blue-400',
-          purple: 'text-purple-300 dark:text-purple-400',
-          green: 'text-green-300 dark:text-green-400',
-          orange: 'text-orange-300 dark:text-orange-400',
-          red: 'text-red-300 dark:text-red-400',
-          indigo: 'text-indigo-300 dark:text-indigo-400',
-        };
-        return iconColorMap[theme.name] || iconColorMap.blue;
-      }
+      // Commented out dark mode support
+      // if (isDarkMode) {
+      //   const iconColorMap: Record<string, string> = {
+      //     blue: 'text-blue-300 dark:text-blue-400',
+      //     purple: 'text-purple-300 dark:text-purple-400',
+      //     green: 'text-green-300 dark:text-green-400',
+      //     orange: 'text-orange-300 dark:text-orange-400',
+      //     red: 'text-red-300 dark:text-red-400',
+      //     indigo: 'text-indigo-300 dark:text-indigo-400',
+      //   };
+      //   return iconColorMap[theme.name] || iconColorMap.blue;
+      // }
       const iconColorMap: Record<string, string> = {
         blue: 'text-blue-600',
         purple: 'text-purple-600',
@@ -114,25 +115,30 @@ export default function Layout({ children, title }: LayoutProps) {
         orange: 'text-orange-600',
         red: 'text-red-600',
         indigo: 'text-indigo-600',
+        black: 'text-gray-900',
+        pink: 'text-pink-600',
+        teal: 'text-teal-600',
+        cyan: 'text-cyan-600',
       };
       return iconColorMap[theme.name] || iconColorMap.blue;
     }
-    return 'text-white dark:text-gray-300';
+    return 'text-white';
   };
 
   // Get dropdown menu item classes based on theme
   const getDropdownItemClasses = () => {
-    if (isDarkMode) {
-      const itemClassMap: Record<string, string> = {
-        blue: 'text-gray-300 hover:bg-blue-900 hover:text-blue-300',
-        purple: 'text-gray-300 hover:bg-purple-900 hover:text-purple-300',
-        green: 'text-gray-300 hover:bg-green-900 hover:text-green-300',
-        orange: 'text-gray-300 hover:bg-orange-900 hover:text-orange-300',
-        red: 'text-gray-300 hover:bg-red-900 hover:text-red-300',
-        indigo: 'text-gray-300 hover:bg-indigo-900 hover:text-indigo-300',
-      };
-      return itemClassMap[theme.name] || itemClassMap.blue;
-    }
+    // Commented out dark mode support
+    // if (isDarkMode) {
+    //   const itemClassMap: Record<string, string> = {
+    //     blue: 'text-gray-300 hover:bg-blue-900 hover:text-blue-300',
+    //     purple: 'text-gray-300 hover:bg-purple-900 hover:text-purple-300',
+    //     green: 'text-gray-300 hover:bg-green-900 hover:text-green-300',
+    //     orange: 'text-gray-300 hover:bg-orange-900 hover:text-orange-300',
+    //     red: 'text-gray-300 hover:bg-red-900 hover:text-red-300',
+    //     indigo: 'text-gray-300 hover:bg-indigo-900 hover:text-indigo-300',
+    //   };
+    //   return itemClassMap[theme.name] || itemClassMap.blue;
+    // }
     const itemClassMap: Record<string, string> = {
       blue: 'text-gray-700 hover:bg-blue-50 hover:text-blue-600',
       purple: 'text-gray-700 hover:bg-purple-50 hover:text-purple-600',
@@ -140,6 +146,10 @@ export default function Layout({ children, title }: LayoutProps) {
       orange: 'text-gray-700 hover:bg-orange-50 hover:text-orange-600',
       red: 'text-gray-700 hover:bg-red-50 hover:text-red-600',
       indigo: 'text-gray-700 hover:bg-indigo-50 hover:text-indigo-600',
+      black: 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+      pink: 'text-gray-700 hover:bg-pink-50 hover:text-pink-600',
+      teal: 'text-gray-700 hover:bg-teal-50 hover:text-teal-600',
+      cyan: 'text-gray-700 hover:bg-cyan-50 hover:text-cyan-600',
     };
     return itemClassMap[theme.name] || itemClassMap.blue;
   };
@@ -153,15 +163,20 @@ export default function Layout({ children, title }: LayoutProps) {
       orange: 'text-orange-600',
       red: 'text-red-600',
       indigo: 'text-indigo-600',
+      black: 'text-gray-900',
+      pink: 'text-pink-600',
+      teal: 'text-teal-600',
+      cyan: 'text-cyan-600',
     };
     return iconClassMap[theme.name] || iconClassMap.blue;
   };
   
   // Get sidebar header gradient classes
   const getSidebarHeaderClasses = () => {
-    if (isDarkMode) {
-      return 'bg-gray-800 dark:bg-gray-900';
-    }
+    // Commented out dark mode support
+    // if (isDarkMode) {
+    //   return 'bg-gray-800 dark:bg-gray-900';
+    // }
     const headerClassMap: Record<string, string> = {
       blue: 'bg-gradient-to-r from-blue-600 to-blue-700',
       purple: 'bg-gradient-to-r from-purple-600 to-purple-700',
@@ -169,6 +184,10 @@ export default function Layout({ children, title }: LayoutProps) {
       orange: 'bg-gradient-to-r from-orange-600 to-orange-700',
       red: 'bg-gradient-to-r from-red-600 to-red-700',
       indigo: 'bg-gradient-to-r from-indigo-600 to-indigo-700',
+      black: 'bg-gradient-to-r from-gray-900 to-black',
+      pink: 'bg-gradient-to-r from-pink-600 to-pink-700',
+      teal: 'bg-gradient-to-r from-teal-600 to-teal-700',
+      cyan: 'bg-gradient-to-r from-cyan-600 to-cyan-700',
     };
     
     return headerClassMap[theme.name] || headerClassMap.blue;
@@ -176,9 +195,10 @@ export default function Layout({ children, title }: LayoutProps) {
 
   // Get sidebar background gradient classes
   const getSidebarBgClasses = () => {
-    if (isDarkMode) {
-      return 'bg-gray-800 dark:bg-gray-900';
-    }
+    // Commented out dark mode support
+    // if (isDarkMode) {
+    //   return 'bg-gray-800 dark:bg-gray-900';
+    // }
     const sidebarBgMap: Record<string, string> = {
       blue: 'bg-gradient-to-b from-blue-600 to-blue-700',
       purple: 'bg-gradient-to-b from-purple-600 to-purple-700',
@@ -186,6 +206,10 @@ export default function Layout({ children, title }: LayoutProps) {
       orange: 'bg-gradient-to-b from-orange-600 to-orange-700',
       red: 'bg-gradient-to-b from-red-600 to-red-700',
       indigo: 'bg-gradient-to-b from-indigo-600 to-indigo-700',
+      black: 'bg-gradient-to-b from-gray-900 to-black',
+      pink: 'bg-gradient-to-b from-pink-600 to-pink-700',
+      teal: 'bg-gradient-to-b from-teal-600 to-teal-700',
+      cyan: 'bg-gradient-to-b from-cyan-600 to-cyan-700',
     };
     
     return sidebarBgMap[theme.name] || sidebarBgMap.blue;
@@ -193,9 +217,10 @@ export default function Layout({ children, title }: LayoutProps) {
 
   // Get page background color classes
   const getPageBgClasses = () => {
-    if (isDarkMode) {
-      return 'bg-gray-900';
-    }
+    // Commented out dark mode support
+    // if (isDarkMode) {
+    //   return 'bg-gray-900';
+    // }
     const pageBgMap: Record<string, string> = {
       blue: 'bg-blue-50',
       purple: 'bg-purple-50',
@@ -203,6 +228,10 @@ export default function Layout({ children, title }: LayoutProps) {
       orange: 'bg-orange-50',
       red: 'bg-red-50',
       indigo: 'bg-indigo-50',
+      black: 'bg-gray-50',
+      pink: 'bg-pink-50',
+      teal: 'bg-teal-50',
+      cyan: 'bg-cyan-50',
     };
     
     return pageBgMap[theme.name] || pageBgMap.blue;
@@ -271,6 +300,36 @@ export default function Layout({ children, title }: LayoutProps) {
     { path: '/itr', label: 'ITR', icon: FileBarChart },
   ];
 
+  // Track menu item click
+  const trackMenuClick = (path: string) => {
+    setMenuClickCounts((prev) => {
+      const newCounts = {
+        ...prev,
+        [path]: (prev[path] || 0) + 1,
+      };
+      // Save to localStorage
+      localStorage.setItem('menu-click-counts', JSON.stringify(newCounts));
+      return newCounts;
+    });
+  };
+
+  // Get top 6 most clicked menu items for quick actions
+  const getQuickActions = () => {
+    const allMenuItems = [...menuItems, ...taxMenuItems];
+    const quickActions = allMenuItems
+      .map((item) => ({
+        ...item,
+        clickCount: menuClickCounts[item.path] || 0,
+      }))
+      .filter((item) => item.clickCount > 0) // Only show items that have been clicked
+      .sort((a, b) => b.clickCount - a.clickCount) // Sort by click count descending
+      .slice(0, 6); // Get top 6
+
+    return quickActions;
+  };
+
+  const quickActions = getQuickActions();
+
   return (
     <div className={`flex h-screen ${getPageBgClasses()} overflow-hidden`}>
       {/* Sidebar */}
@@ -284,20 +343,20 @@ export default function Layout({ children, title }: LayoutProps) {
           !sidebarOpen ? 'px-2' : ''
         }`}>
           {sidebarOpen && (
-            <h1 className="text-xl font-bold text-white dark:text-white truncate">S.D.Taxation</h1>
+            <h1 className="text-xl font-bold text-white truncate">S.D.Taxation</h1>
           )}
           {!sidebarOpen && (
-            <div className="text-white dark:text-white font-bold text-lg">SD</div>
+            <div className="text-white font-bold text-lg">SD</div>
           )}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="lg:hidden text-white dark:text-gray-300 hover:text-gray-200 dark:hover:text-white p-1"
+            className="lg:hidden text-white hover:text-gray-200 p-1"
           >
             <X size={24} />
           </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden lg:block text-white dark:text-gray-300 hover:text-gray-200 dark:hover:text-white p-1"
+            className="hidden lg:block text-white hover:text-gray-200 p-1"
           >
             {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
           </button>
@@ -307,7 +366,7 @@ export default function Layout({ children, title }: LayoutProps) {
           <nav className="space-y-2">
             <div className="pb-2">
               {sidebarOpen && (
-                <h3 className="text-xs font-semibold text-white dark:text-gray-400 text-opacity-70 dark:text-opacity-100 uppercase tracking-wider mb-3 px-2">
+                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
                   Main Menu
                 </h3>
               )}
@@ -318,6 +377,7 @@ export default function Layout({ children, title }: LayoutProps) {
                   <button
                     key={item.path}
                     onClick={() => {
+                      trackMenuClick(item.path);
                       navigate(item.path);
                       setMobileMenuOpen(false);
                     }}
@@ -325,7 +385,7 @@ export default function Layout({ children, title }: LayoutProps) {
                     title={!sidebarOpen ? item.label : ''}
                   >
                     <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
-                    {sidebarOpen && <span className={isActive ? (isDarkMode ? '' : '') : 'text-white dark:text-gray-300'}>{item.label}</span>}
+                    {sidebarOpen && <span className={isActive ? '' : 'text-white'}>{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -336,9 +396,9 @@ export default function Layout({ children, title }: LayoutProps) {
               })}
             </div>
 
-            <div className="pt-2 border-t border-white border-opacity-20 dark:border-gray-700">
+            <div className="pt-2 border-t border-white border-opacity-20">
               {sidebarOpen && (
-                <h3 className="text-xs font-semibold text-white dark:text-gray-400 text-opacity-70 dark:text-opacity-100 uppercase tracking-wider mb-3 px-2">
+                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
                   TAX MODULES
                 </h3>
               )}
@@ -349,6 +409,7 @@ export default function Layout({ children, title }: LayoutProps) {
                   <button
                     key={item.path}
                     onClick={() => {
+                      trackMenuClick(item.path);
                       navigate(item.path);
                       setMobileMenuOpen(false);
                     }}
@@ -356,7 +417,7 @@ export default function Layout({ children, title }: LayoutProps) {
                     title={!sidebarOpen ? item.label : ''}
                   >
                     <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
-                    {sidebarOpen && <span className={`font-bold ${isActive ? '' : 'text-white dark:text-gray-300'}`}>{item.label}</span>}
+                    {sidebarOpen && <span className={`font-bold ${isActive ? '' : 'text-white'}`}>{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -367,72 +428,6 @@ export default function Layout({ children, title }: LayoutProps) {
               })}
             </div>
 
-            {sidebarOpen && (
-              <div className="pt-4 border-t border-white border-opacity-20 dark:border-gray-700">
-                <h3 className="text-xs font-semibold text-white dark:text-gray-400 text-opacity-70 dark:text-opacity-100 uppercase tracking-wider mb-3 px-2">
-                  Quick Actions
-                </h3>
-                <div className="grid grid-cols-2 gap-2 px-1">
-                  <button className="flex flex-col items-center p-3 text-xs text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors">
-                    <Mail size={16} className="mb-1" />
-                    <span className="font-bold">Gmail</span>
-                  </button>
-                  <button className="flex flex-col items-center p-3 text-xs text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors">
-                    <Download size={16} className="mb-1" />
-                    <span className="font-bold">Download</span>
-                  </button>
-                  <button className="flex flex-col items-center p-3 text-xs text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors">
-                    <Globe size={16} className="mb-1" />
-                    <span className="font-bold">Online</span>
-                  </button>
-                  <button className="flex flex-col items-center p-3 text-xs text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors">
-                    <Receipt size={16} className="mb-1" />
-                    <span className="font-bold">E-way Bill</span>
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {!sidebarOpen && (
-              <div className="pt-4 border-t border-white border-opacity-20 dark:border-gray-700 space-y-2">
-                <button 
-                  className="w-full flex justify-center p-2 text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors group relative"
-                  title="Gmail"
-                >
-                  <Mail size={20} />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                    Gmail
-                  </div>
-                </button>
-                <button 
-                  className="w-full flex justify-center p-2 text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors group relative"
-                  title="Download"
-                >
-                  <Download size={20} />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                    Download
-                  </div>
-                </button>
-                <button 
-                  className="w-full flex justify-center p-2 text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors group relative"
-                  title="Online"
-                >
-                  <Globe size={20} />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                    Online
-                  </div>
-                </button>
-                <button 
-                  className="w-full flex justify-center p-2 text-white dark:text-gray-300 bg-white bg-opacity-10 dark:bg-gray-700 rounded-lg hover:bg-opacity-20 dark:hover:bg-gray-600 transition-colors group relative"
-                  title="E-way Bill"
-                >
-                  <Receipt size={20} />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                    E-way Bill
-                  </div>
-                </button>
-              </div>
-            )}
           </nav>
         </div>
       </div>
@@ -520,32 +515,32 @@ export default function Layout({ children, title }: LayoutProps) {
                           />
                         </button>
                         {themeMenuOpen && (
-                          <div className="pl-4 pr-2 py-2 space-y-1">
-                            {/* Dark Mode Toggle */}
-                            <button
+                          <div className="pl-4 pr-2 py-2 max-h-80 overflow-y-auto space-y-1">
+                            {/* Dark Mode Toggle - Commented Out */}
+                            {/* <button
                               onClick={() => {
                                 toggleDarkMode();
                               }}
                               className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
                                 isDarkMode
                                   ? getDropdownItemClasses()
-                                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                  : 'text-gray-600 hover:bg-gray-50'
                               }`}
                             >
                               <div className="flex items-center space-x-2">
                                 {isDarkMode ? (
                                   <Moon size={16} className={getDropdownIconClasses()} />
                                 ) : (
-                                  <Sun size={16} className="text-gray-600 dark:text-gray-400" />
+                                  <Sun size={16} className="text-gray-600" />
                                 )}
-                                <span className="font-medium dark:text-gray-300">Dark Mode</span>
+                                <span className="font-medium">Dark Mode</span>
                               </div>
                               {isDarkMode && (
                                 <div className={getDropdownIconClasses()}>
                                   <CheckSquare size={14} />
                                 </div>
                               )}
-                            </button>
+                            </button> */}
                             {availableThemes.map((themeOption) => (
                               <button
                                 key={themeOption.name}
@@ -556,7 +551,7 @@ export default function Layout({ children, title }: LayoutProps) {
                                 className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
                                   theme.name === themeOption.name
                                     ? getDropdownItemClasses()
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    : 'text-gray-600 hover:bg-gray-50'
                                 }`}
                               >
                                 <div className="flex items-center space-x-2">
@@ -567,10 +562,15 @@ export default function Layout({ children, title }: LayoutProps) {
                                       themeOption.name === 'green' ? 'bg-green-600' :
                                       themeOption.name === 'orange' ? 'bg-orange-600' :
                                       themeOption.name === 'red' ? 'bg-red-600' :
-                                      'bg-indigo-600'
+                                      themeOption.name === 'indigo' ? 'bg-indigo-600' :
+                                      themeOption.name === 'black' ? 'bg-gray-900' :
+                                      themeOption.name === 'pink' ? 'bg-pink-600' :
+                                      themeOption.name === 'teal' ? 'bg-teal-600' :
+                                      themeOption.name === 'cyan' ? 'bg-cyan-600' :
+                                      'bg-blue-600'
                                     }`}
                                   />
-                                  <span className="font-medium dark:text-gray-300">{themeOption.displayName}</span>
+                                  <span className="font-medium">{themeOption.displayName}</span>
                                 </div>
                                 {theme.name === themeOption.name && (
                                   <div className={getDropdownIconClasses()}>
@@ -621,48 +621,31 @@ export default function Layout({ children, title }: LayoutProps) {
                 <ChevronDown size={16} className="text-gray-500 dark:text-gray-400" />
               </button>
 
-              {/* Action Buttons */}
-              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
-                <ShoppingCart size={16} />
-                <span>Sale</span>
-                <Plus size={16} />
-              </button>
-
-              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
-                <Package2 size={16} />
-                <span>Purchase</span>
-                <Plus size={16} />
-              </button>
-
-              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
-                <Receipt size={16} />
-                <span>Receipt</span>
-                <Plus size={16} />
-              </button>
-
-              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
-                <Wallet size={16} />
-                <span>Payment</span>
-                <Plus size={16} />
-              </button>
-
-              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
-                <BookOpen size={16} />
-                <span>Journal</span>
-                <Plus size={16} />
-              </button>
-
-              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
-                <Book size={16} />
-                <span>Ledger</span>
-                <Plus size={16} />
-              </button>
-
-              <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
-                <Package size={16} />
-                <span>Item</span>
-                <Plus size={16} />
-              </button>
+              {/* Dynamic Quick Action Buttons - Based on Sidebar Click Tracking */}
+              {quickActions.slice(0, 7).map((action) => {
+                const ActionIcon = action.icon;
+                return (
+                  <button
+                    key={action.path}
+                    onClick={() => {
+                      trackMenuClick(action.path);
+                      navigate(action.path);
+                    }}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap hover:opacity-90 relative ${getSidebarHeaderClasses()}`}
+                    title={action.label}
+                  >
+                    <ActionIcon size={16} />
+                    <span>{action.label}</span>
+                    <Plus size={16} />
+                    {/* Click count badge - commented out */}
+                    {/* {action.clickCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                        {action.clickCount}
+                      </span>
+                    )} */}
+                  </button>
+                );
+              })}
 
               {/* Notification Bell */}
               <button className={`flex items-center justify-center px-3 py-2 rounded-lg text-white transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>

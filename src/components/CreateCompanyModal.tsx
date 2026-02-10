@@ -65,6 +65,7 @@ export default function CreateCompanyModal({
     gstNumber: '',
     fiscalYear: '',
     industry: '',
+    industries: '',
     constitution_of_business: ''
   });
   
@@ -72,6 +73,15 @@ export default function CreateCompanyModal({
   const [fiscalEndYear, setFiscalEndYear] = useState<string>('');
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isTdsApplicable, setIsTdsApplicable] = useState<boolean>(false);
+  const [isProfessional, setIsProfessional] = useState<boolean>(false);
+  const [isEpf, setIsEpf] = useState<boolean>(false);
+  const [isPf, setIsPf] = useState<boolean>(false);
+  const [isEsic, setIsEsic] = useState<boolean>(false);
+  const [tdsNumber, setTdsNumber] = useState<string>('');
+  const [professionalNumber, setProfessionalNumber] = useState<string>('');
+  const [epfNumber, setEpfNumber] = useState<string>('');
+  const [pfNumber, setPfNumber] = useState<string>('');
+  const [esicNumber, setEsicNumber] = useState<string>('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pincodeLoading, setPincodeLoading] = useState(false);
@@ -265,6 +275,31 @@ export default function CreateCompanyModal({
       }
     }
 
+    // Validate TDS Number (required if TDS Applicable is true)
+    if (isTdsApplicable && !tdsNumber.trim()) {
+      newErrors.tdsNumber = 'TDS Number is required when TDS Applicable is enabled';
+    }
+
+    // Validate Professional Number (required if Professional is true)
+    if (isProfessional && !professionalNumber.trim()) {
+      newErrors.professionalNumber = 'Professional Number is required when Professional is enabled';
+    }
+
+    // Validate EPF Number (required if EPF is true)
+    if (isEpf && !epfNumber.trim()) {
+      newErrors.epfNumber = 'EPF Number is required when EPF is enabled';
+    }
+
+    // Validate PF Number (required if PF is true)
+    if (isPf && !pfNumber.trim()) {
+      newErrors.pfNumber = 'PF Number is required when PF is enabled';
+    }
+
+    // Validate ESIC Number (required if ESIC is true)
+    if (isEsic && !esicNumber.trim()) {
+      newErrors.esicNumber = 'ESIC Number is required when ESIC is enabled';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -277,7 +312,21 @@ export default function CreateCompanyModal({
     }
 
     try {
-      await onSubmit({ ...formData, tdsApplicable: isTdsApplicable });
+      const submitData: CreateCompanyRequest = {
+        ...formData,
+        tdsApplicable: isTdsApplicable,
+        tdsNumber: isTdsApplicable ? tdsNumber : undefined,
+        professional: isProfessional,
+        professionalNumber: isProfessional ? professionalNumber : undefined,
+        epf: isEpf,
+        epfNumber: isEpf ? epfNumber : undefined,
+        pf: isPf,
+        pfNumber: isPf ? pfNumber : undefined,
+        esic: isEsic,
+        esicNumber: isEsic ? esicNumber : undefined,
+      };
+      
+      await onSubmit(submitData);
       // Reset form on success
       setFormData({
         company_name: '',
@@ -294,12 +343,22 @@ export default function CreateCompanyModal({
         gstNumber: '',
         fiscalYear: '',
         industry: '',
+        industries: '',
         constitution_of_business: ''
       });
       setFiscalStartYear('');
       setFiscalEndYear('');
       setIsActive(false);
       setIsTdsApplicable(false);
+      setIsProfessional(false);
+      setIsEpf(false);
+      setIsPf(false);
+      setIsEsic(false);
+      setTdsNumber('');
+      setProfessionalNumber('');
+      setEpfNumber('');
+      setPfNumber('');
+      setEsicNumber('');
       setErrors({});
     } catch (error) {
       console.error('Form submission error:', error);
@@ -481,7 +540,17 @@ export default function CreateCompanyModal({
                 </label>
                 <button
                   type="button"
-                  onClick={() => setIsTdsApplicable(!isTdsApplicable)}
+                  onClick={() => {
+                    setIsTdsApplicable(!isTdsApplicable);
+                    if (isTdsApplicable) {
+                      setTdsNumber('');
+                      setErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.tdsNumber;
+                        return newErrors;
+                      });
+                    }
+                  }}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                     isTdsApplicable ? 'bg-green-600' : 'bg-gray-300'
                   }`}
@@ -497,6 +566,263 @@ export default function CreateCompanyModal({
               <p className="text-xs text-gray-500">
                 <b>If TDS (Tax Deducted at Source) is applicable for this company</b>
               </p>
+              {isTdsApplicable && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    TDS Number *
+                  </label>
+                  <input
+                    type="text"
+                    value={tdsNumber}
+                    onChange={(e) => {
+                      setTdsNumber(e.target.value);
+                      if (errors.tdsNumber) {
+                        setErrors(prev => ({ ...prev, tdsNumber: '' }));
+                      }
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.tdsNumber ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter TDS Number"
+                    disabled={loading}
+                  />
+                  {errors.tdsNumber && (
+                    <p className="mt-1 text-sm text-red-600">{errors.tdsNumber}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Professional Toggle */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Professional
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProfessional(!isProfessional);
+                    if (isProfessional) {
+                      setProfessionalNumber('');
+                      setErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.professionalNumber;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    isProfessional ? 'bg-green-600' : 'bg-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isProfessional ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {isProfessional && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Professional Number *
+                  </label>
+                  <input
+                    type="text"
+                    value={professionalNumber}
+                    onChange={(e) => {
+                      setProfessionalNumber(e.target.value);
+                      if (errors.professionalNumber) {
+                        setErrors(prev => ({ ...prev, professionalNumber: '' }));
+                      }
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.professionalNumber ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter Professional Number"
+                    disabled={loading}
+                  />
+                  {errors.professionalNumber && (
+                    <p className="mt-1 text-sm text-red-600">{errors.professionalNumber}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* EPF Toggle */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  EPF
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEpf(!isEpf);
+                    if (isEpf) {
+                      setEpfNumber('');
+                      setErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.epfNumber;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    isEpf ? 'bg-green-600' : 'bg-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isEpf ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {isEpf && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    EPF Number *
+                  </label>
+                  <input
+                    type="text"
+                    value={epfNumber}
+                    onChange={(e) => {
+                      setEpfNumber(e.target.value);
+                      if (errors.epfNumber) {
+                        setErrors(prev => ({ ...prev, epfNumber: '' }));
+                      }
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.epfNumber ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter EPF Number"
+                    disabled={loading}
+                  />
+                  {errors.epfNumber && (
+                    <p className="mt-1 text-sm text-red-600">{errors.epfNumber}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* PF Toggle */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  PF
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPf(!isPf);
+                    if (isPf) {
+                      setPfNumber('');
+                      setErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.pfNumber;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    isPf ? 'bg-green-600' : 'bg-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isPf ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {isPf && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    PF Number *
+                  </label>
+                  <input
+                    type="text"
+                    value={pfNumber}
+                    onChange={(e) => {
+                      setPfNumber(e.target.value);
+                      if (errors.pfNumber) {
+                        setErrors(prev => ({ ...prev, pfNumber: '' }));
+                      }
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.pfNumber ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter PF Number"
+                    disabled={loading}
+                  />
+                  {errors.pfNumber && (
+                    <p className="mt-1 text-sm text-red-600">{errors.pfNumber}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* ESIC Toggle */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  ESIC
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEsic(!isEsic);
+                    if (isEsic) {
+                      setEsicNumber('');
+                      setErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.esicNumber;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    isEsic ? 'bg-green-600' : 'bg-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isEsic ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {isEsic && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    ESIC Number *
+                  </label>
+                  <input
+                    type="text"
+                    value={esicNumber}
+                    onChange={(e) => {
+                      setEsicNumber(e.target.value);
+                      if (errors.esicNumber) {
+                        setErrors(prev => ({ ...prev, esicNumber: '' }));
+                      }
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.esicNumber ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter ESIC Number"
+                    disabled={loading}
+                  />
+                  {errors.esicNumber && (
+                    <p className="mt-1 text-sm text-red-600">{errors.esicNumber}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

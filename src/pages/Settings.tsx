@@ -1,10 +1,9 @@
-import React from 'react';
 import Layout from '../components/Layout';
 import { useTheme } from '../contexts/ThemeContext';
-import { Palette, Check, Moon, Sun } from 'lucide-react';
+import { Palette, Check } from 'lucide-react';
 
 export default function Settings() {
-  const { theme, themeName, setTheme, availableThemes, isDarkMode, toggleDarkMode } = useTheme();
+  const { theme, themeName, setTheme, availableThemes } = useTheme();
 
   const getThemeColorClass = (themeName: string) => {
     const colorMap: Record<string, string> = {
@@ -14,6 +13,10 @@ export default function Settings() {
       orange: 'bg-orange-600',
       red: 'bg-red-600',
       indigo: 'bg-indigo-600',
+      black: 'bg-gray-900',
+      pink: 'bg-pink-600',
+      teal: 'bg-teal-600',
+      cyan: 'bg-cyan-600',
     };
     return colorMap[themeName] || 'bg-blue-600';
   };
@@ -26,6 +29,10 @@ export default function Settings() {
       orange: 'border-orange-100',
       red: 'border-red-100',
       indigo: 'border-indigo-100',
+      black: 'border-gray-200',
+      pink: 'border-pink-100',
+      teal: 'border-teal-100',
+      cyan: 'border-cyan-100',
     };
     return borderMap[themeName] || 'border-blue-100';
   };
@@ -38,6 +45,10 @@ export default function Settings() {
       orange: 'bg-orange-50',
       red: 'bg-red-50',
       indigo: 'bg-indigo-50',
+      black: 'bg-gray-50',
+      pink: 'bg-pink-50',
+      teal: 'bg-teal-50',
+      cyan: 'bg-cyan-50',
     };
     return lightMap[themeName] || 'bg-blue-50';
   };
@@ -50,6 +61,10 @@ export default function Settings() {
       orange: 'text-orange-600',
       red: 'text-red-600',
       indigo: 'text-indigo-600',
+      black: 'text-gray-900',
+      pink: 'text-pink-600',
+      teal: 'text-teal-600',
+      cyan: 'text-cyan-600',
     };
     return textMap[themeName] || 'text-blue-600';
   };
@@ -62,6 +77,10 @@ export default function Settings() {
       orange: 'border-orange-600',
       red: 'border-red-600',
       indigo: 'border-indigo-600',
+      black: 'border-gray-900',
+      pink: 'border-pink-600',
+      teal: 'border-teal-600',
+      cyan: 'border-cyan-600',
     };
     return borderMap[themeName] || 'border-blue-600';
   };
@@ -69,8 +88,8 @@ export default function Settings() {
   return (
     <Layout title="Settings">
       <div className="space-y-6">
-        {/* Dark Mode Toggle */}
-        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 ${getThemeBorderClass(themeName)}`}>
+        {/* Dark Mode Toggle - Commented Out */}
+        {/* <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 ${getThemeBorderClass(themeName)}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className={`p-2 rounded-lg ${getThemeLightClass(themeName)} dark:bg-gray-700`}>
@@ -100,7 +119,7 @@ export default function Settings() {
               />
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* Theme Selection */}
         <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 ${getThemeBorderClass(themeName)}`}>
@@ -114,7 +133,7 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-2">
             {availableThemes.map((availableTheme) => {
               const isSelected = themeName === availableTheme.name;
               return (
