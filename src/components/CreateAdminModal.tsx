@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, UserCheck, Mail, Phone, MapPin, Building2, Loader2, Eye, EyeOff, User, Shield, Briefcase } from 'lucide-react';
-import { CreateAdminRequest, Company } from '../services/api';
+import { X, UserCheck, Mail, Phone, MapPin, Building2, Loader2, Eye, EyeOff, User, Shield, Briefcase, Lock } from 'lucide-react';
+import { CreateAdminRequest, Company, AdminPermissions, ModulePermissions } from '../services/api';
 
 interface CreateAdminModalProps {
   isOpen: boolean;
@@ -17,6 +17,13 @@ export default function CreateAdminModal({
   companies,
   loading = false 
 }: CreateAdminModalProps) {
+  const defaultPermissions: AdminPermissions = {
+    hrm: { create: false, read: false, update: false, delete: false },
+    payroll: { create: false, read: false, update: false, delete: false },
+    crm: { create: false, read: false, update: false, delete: false },
+    erp: { create: false, read: false, update: false, delete: false },
+  };
+
   const [formData, setFormData] = useState<CreateAdminRequest>({
     fullname: '',
     username: '',
@@ -27,7 +34,8 @@ export default function CreateAdminModal({
     phone: '',
     department: '',
     adminArea: '',
-    company: companies.length > 0 ? companies[0]._id : ''
+    company: companies.length > 0 ? companies[0]._id : '',
+    permissions: defaultPermissions
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -46,7 +54,8 @@ export default function CreateAdminModal({
         phone: '',
         department: '',
         adminArea: '',
-        company: companies.length > 0 ? companies[0]._id : ''
+        company: companies.length > 0 ? companies[0]._id : '',
+        permissions: defaultPermissions
       });
       setErrors({});
     }
@@ -118,6 +127,34 @@ export default function CreateAdminModal({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handlePermissionChange = (module: keyof AdminPermissions, permission: keyof ModulePermissions, value: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      permissions: {
+        ...prev.permissions!,
+        [module]: {
+          ...prev.permissions![module],
+          [permission]: value
+        }
+      }
+    }));
+  };
+
+  const handleSelectAllModule = (module: keyof AdminPermissions, value: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      permissions: {
+        ...prev.permissions!,
+        [module]: {
+          create: value,
+          read: value,
+          update: value,
+          delete: value
+        }
+      }
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -417,6 +454,65 @@ export default function CreateAdminModal({
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Permissions Section */}
+          <div className="space-y-6">
+            <div className="flex items-center space-x-3 pb-4 border-b border-gray-100">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Lock className="text-purple-600" size={20} />
+              </div>
+              <h4 className="text-xl font-semibold text-gray-900">Module Permissions</h4>
+            </div>
+
+            <div className="space-y-6">
+              {(['hrm', 'payroll', 'crm', 'erp'] as const).map((module) => (
+                <div key={module} className="border border-gray-200 rounded-xl p-6 bg-gray-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <h5 className="text-lg font-semibold text-gray-900 uppercase">
+                      {module === 'hrm' ? 'HRM' : module === 'payroll' ? 'Payroll' : module === 'crm' ? 'CRM' : 'ERP'}
+                    </h5>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allSelected = formData.permissions![module].create && 
+                                          formData.permissions![module].read && 
+                                          formData.permissions![module].update && 
+                                          formData.permissions![module].delete;
+                        handleSelectAllModule(module, !allSelected);
+                      }}
+                      className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                    >
+                      {formData.permissions![module].create && 
+                       formData.permissions![module].read && 
+                       formData.permissions![module].update && 
+                       formData.permissions![module].delete
+                        ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {(['create', 'read', 'update', 'delete'] as const).map((permission) => (
+                      <label
+                        key={permission}
+                        className="flex items-center space-x-3 p-3 bg-white rounded-lg border-2 border-gray-200 hover:border-purple-300 cursor-pointer transition-all"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.permissions![module][permission]}
+                          onChange={(e) => handlePermissionChange(module, permission, e.target.checked)}
+                          className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                        />
+                        <span className="text-sm font-medium text-gray-700 capitalize">
+                          {permission === 'create' ? 'Create' : 
+                           permission === 'read' ? 'Read' : 
+                           permission === 'update' ? 'Update' : 'Delete'}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

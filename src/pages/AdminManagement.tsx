@@ -27,6 +27,18 @@ export default function AdminManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCompany, setSelectedCompany] = useState<string>('');
 
+  // Listen for custom event to open create admin modal from header button
+  useEffect(() => {
+    const handleOpenCreateModal = () => {
+      setCreateModalOpen(true);
+    };
+
+    window.addEventListener('openCreateAdminModal', handleOpenCreateModal);
+    return () => {
+      window.removeEventListener('openCreateAdminModal', handleOpenCreateModal);
+    };
+  }, []);
+
   // Fetch companies for admin creation
   const fetchCompanies = async () => {
     try {

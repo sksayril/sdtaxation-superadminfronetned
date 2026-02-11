@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, UserCheck, Mail, Phone, MapPin, Building2, Loader2, User, Shield, Briefcase } from 'lucide-react';
-import { Admin, Company, UpdateAdminRequest } from '../services/api';
+import { X, UserCheck, Mail, Phone, MapPin, Building2, Loader2, User, Shield, Briefcase, Lock } from 'lucide-react';
+import { Admin, Company, UpdateAdminRequest, AdminPermissions, ModulePermissions } from '../services/api';
 
 interface EditAdminModalProps {
   isOpen: boolean;
@@ -19,6 +19,13 @@ export default function EditAdminModal({
   companies,
   loading = false 
 }: EditAdminModalProps) {
+  const defaultPermissions: AdminPermissions = {
+    hrm: { create: false, read: false, update: false, delete: false },
+    payroll: { create: false, read: false, update: false, delete: false },
+    crm: { create: false, read: false, update: false, delete: false },
+    erp: { create: false, read: false, update: false, delete: false },
+  };
+
   const [formData, setFormData] = useState<UpdateAdminRequest>({
     fullname: '',
     username: '',
@@ -27,7 +34,8 @@ export default function EditAdminModal({
     phone: '',
     department: '',
     adminArea: '',
-    company: ''
+    company: '',
+    permissions: defaultPermissions
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -44,7 +52,8 @@ export default function EditAdminModal({
         phone: admin.phone || '',
         department: department,
         adminArea: admin.adminArea || '',
-        company: admin.company?._id || ''
+        company: admin.company?._id || '',
+        permissions: admin.permissions || defaultPermissions
       });
       setErrors({});
     }
@@ -97,6 +106,34 @@ export default function EditAdminModal({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handlePermissionChange = (module: keyof AdminPermissions, permission: keyof ModulePermissions, value: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      permissions: {
+        ...prev.permissions!,
+        [module]: {
+          ...prev.permissions![module],
+          [permission]: value
+        }
+      }
+    }));
+  };
+
+  const handleSelectAllModule = (module: keyof AdminPermissions, value: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      permissions: {
+        ...prev.permissions!,
+        [module]: {
+          create: value,
+          read: value,
+          update: value,
+          delete: value
+        }
+      }
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -367,6 +404,65 @@ export default function EditAdminModal({
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Permissions Section */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2 pb-2 border-b border-gray-100">
+              <div className="p-1.5 bg-purple-100 rounded-lg">
+                <Lock className="text-purple-600" size={16} />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900">Module Permissions</h4>
+            </div>
+
+            <div className="space-y-4">
+              {(['hrm', 'payroll', 'crm', 'erp'] as const).map((module) => (
+                <div key={module} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                  <div className="flex items-center justify-between mb-3">
+                    <h5 className="text-base font-semibold text-gray-900 uppercase">
+                      {module === 'hrm' ? 'HRM' : module === 'payroll' ? 'Payroll' : module === 'crm' ? 'CRM' : 'ERP'}
+                    </h5>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allSelected = formData.permissions![module].create && 
+                                          formData.permissions![module].read && 
+                                          formData.permissions![module].update && 
+                                          formData.permissions![module].delete;
+                        handleSelectAllModule(module, !allSelected);
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      {formData.permissions![module].create && 
+                       formData.permissions![module].read && 
+                       formData.permissions![module].update && 
+                       formData.permissions![module].delete
+                        ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {(['create', 'read', 'update', 'delete'] as const).map((permission) => (
+                      <label
+                        key={permission}
+                        className="flex items-center space-x-2 p-2 bg-white rounded-lg border-2 border-gray-200 hover:border-blue-300 cursor-pointer transition-all"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.permissions![module][permission]}
+                          onChange={(e) => handlePermissionChange(module, permission, e.target.checked)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        />
+                        <span className="text-xs font-medium text-gray-700 capitalize">
+                          {permission === 'create' ? 'Create' : 
+                           permission === 'read' ? 'Read' : 
+                           permission === 'update' ? 'Update' : 'Delete'}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

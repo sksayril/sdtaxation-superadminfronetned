@@ -137,6 +137,21 @@ export interface DeleteCompanyResponse {
   message: string;
 }
 
+// Permission types
+export interface ModulePermissions {
+  create: boolean;
+  read: boolean;
+  update: boolean;
+  delete: boolean;
+}
+
+export interface AdminPermissions {
+  hrm: ModulePermissions;
+  payroll: ModulePermissions;
+  crm: ModulePermissions;
+  erp: ModulePermissions;
+}
+
 // Admin related types
 export interface CreateAdminRequest {
   fullname: string;
@@ -149,6 +164,7 @@ export interface CreateAdminRequest {
   department: string;
   adminArea: string;
   company: string;
+  permissions?: AdminPermissions;
 }
 
 export interface CreateAdminResponse {
@@ -188,6 +204,7 @@ export interface Admin {
   created_by: any;
   status: string;
   lastLogin: string;
+  permissions?: AdminPermissions;
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -208,6 +225,7 @@ export interface UpdateAdminRequest {
   department?: string;
   adminArea?: string;
   company?: string;
+  permissions?: AdminPermissions;
 }
 
 export interface UpdateAdminResponse {

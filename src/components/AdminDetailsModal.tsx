@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, User, Mail, Phone, MapPin, Building2, Shield, Calendar, Clock, UserCheck, Briefcase, Globe, Key, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { X, User, Mail, Phone, MapPin, Building2, Shield, Calendar, Clock, UserCheck, Briefcase, Globe, Key, Eye, EyeOff, Copy, Check, Lock, CheckSquare } from 'lucide-react';
 import { Admin } from '../services/api';
 
 interface AdminDetailsModalProps {
@@ -287,6 +287,63 @@ export default function AdminDetailsModal({ isOpen, onClose, admin }: AdminDetai
               )}
             </div>
           </div>
+
+          {/* Permissions Section */}
+          {admin.permissions && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 pb-2 border-b border-gray-200">
+                <div className="p-1.5 bg-purple-100 rounded-lg">
+                  <Lock className="text-purple-600" size={16} />
+                </div>
+                <h4 className="text-lg font-semibold text-gray-900">Module Permissions</h4>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(['hrm', 'payroll', 'crm', 'erp'] as const).map((module) => {
+                  const modulePermissions = admin.permissions![module];
+                  const moduleName = module === 'hrm' ? 'HRM' : module === 'payroll' ? 'Payroll' : module === 'crm' ? 'CRM' : 'ERP';
+                  
+                  return (
+                    <div key={module} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                      <h5 className="text-base font-semibold text-gray-900 mb-3 uppercase">
+                        {moduleName}
+                      </h5>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(['create', 'read', 'update', 'delete'] as const).map((permission) => {
+                          const hasPermission = modulePermissions[permission];
+                          const permissionName = permission === 'create' ? 'Create' : 
+                                                 permission === 'read' ? 'Read' : 
+                                                 permission === 'update' ? 'Update' : 'Delete';
+                          
+                          return (
+                            <div
+                              key={permission}
+                              className={`flex items-center space-x-2 p-2 rounded-lg ${
+                                hasPermission 
+                                  ? 'bg-green-50 border border-green-200' 
+                                  : 'bg-gray-100 border border-gray-200'
+                              }`}
+                            >
+                              {hasPermission ? (
+                                <CheckSquare className="text-green-600" size={16} />
+                              ) : (
+                                <div className="w-4 h-4 border-2 border-gray-300 rounded"></div>
+                              )}
+                              <span className={`text-xs font-medium ${
+                                hasPermission ? 'text-green-800' : 'text-gray-500'
+                              }`}>
+                                {permissionName}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Activity Information */}
           <div className="space-y-4">

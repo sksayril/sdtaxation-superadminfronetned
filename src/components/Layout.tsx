@@ -33,6 +33,9 @@ import {
   Search,
   Plus,
   Bell,
+  Download,
+  HardDrive,
+  RefreshCw,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -61,6 +64,10 @@ export default function Layout({ children, title }: LayoutProps) {
   // Get active menu item classes based on theme
   const getActiveMenuClasses = (isActive: boolean) => {
     if (!isActive) {
+      // White theme needs black text, others need white text
+      if (theme.name === 'white') {
+        return 'text-gray-900 hover:bg-gray-100';
+      }
       return 'text-white hover:bg-white hover:bg-opacity-10';
     }
     
@@ -88,6 +95,7 @@ export default function Layout({ children, title }: LayoutProps) {
       pink: 'bg-white text-pink-600 rounded-lg',
       teal: 'bg-white text-teal-600 rounded-lg',
       cyan: 'bg-white text-cyan-600 rounded-lg',
+      white: 'bg-gray-100 text-gray-900 rounded-lg',
     };
     
     return activeClassMap[theme.name] || activeClassMap.blue;
@@ -119,8 +127,13 @@ export default function Layout({ children, title }: LayoutProps) {
         pink: 'text-pink-600',
         teal: 'text-teal-600',
         cyan: 'text-cyan-600',
+        white: 'text-gray-900',
       };
       return iconColorMap[theme.name] || iconColorMap.blue;
+    }
+    // White theme needs black text, others need white text
+    if (theme.name === 'white') {
+      return 'text-gray-900';
     }
     return 'text-white';
   };
@@ -139,19 +152,20 @@ export default function Layout({ children, title }: LayoutProps) {
     //   };
     //   return itemClassMap[theme.name] || itemClassMap.blue;
     // }
-    const itemClassMap: Record<string, string> = {
-      blue: 'text-gray-700 hover:bg-blue-50 hover:text-blue-600',
-      purple: 'text-gray-700 hover:bg-purple-50 hover:text-purple-600',
-      green: 'text-gray-700 hover:bg-green-50 hover:text-green-600',
-      orange: 'text-gray-700 hover:bg-orange-50 hover:text-orange-600',
-      red: 'text-gray-700 hover:bg-red-50 hover:text-red-600',
-      indigo: 'text-gray-700 hover:bg-indigo-50 hover:text-indigo-600',
-      black: 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
-      pink: 'text-gray-700 hover:bg-pink-50 hover:text-pink-600',
-      teal: 'text-gray-700 hover:bg-teal-50 hover:text-teal-600',
-      cyan: 'text-gray-700 hover:bg-cyan-50 hover:text-cyan-600',
-    };
-    return itemClassMap[theme.name] || itemClassMap.blue;
+      const itemClassMap: Record<string, string> = {
+        blue: 'text-gray-700 hover:bg-blue-50 hover:text-blue-600',
+        purple: 'text-gray-700 hover:bg-purple-50 hover:text-purple-600',
+        green: 'text-gray-700 hover:bg-green-50 hover:text-green-600',
+        orange: 'text-gray-700 hover:bg-orange-50 hover:text-orange-600',
+        red: 'text-gray-700 hover:bg-red-50 hover:text-red-600',
+        indigo: 'text-gray-700 hover:bg-indigo-50 hover:text-indigo-600',
+        black: 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+        pink: 'text-gray-700 hover:bg-pink-50 hover:text-pink-600',
+        teal: 'text-gray-700 hover:bg-teal-50 hover:text-teal-600',
+        cyan: 'text-gray-700 hover:bg-cyan-50 hover:text-cyan-600',
+        white: 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+      };
+      return itemClassMap[theme.name] || itemClassMap.blue;
   };
 
   // Get dropdown icon color classes based on theme
@@ -167,6 +181,7 @@ export default function Layout({ children, title }: LayoutProps) {
       pink: 'text-pink-600',
       teal: 'text-teal-600',
       cyan: 'text-cyan-600',
+      white: 'text-gray-900',
     };
     return iconClassMap[theme.name] || iconClassMap.blue;
   };
@@ -188,6 +203,7 @@ export default function Layout({ children, title }: LayoutProps) {
       pink: 'bg-gradient-to-r from-pink-600 to-pink-700',
       teal: 'bg-gradient-to-r from-teal-600 to-teal-700',
       cyan: 'bg-gradient-to-r from-cyan-600 to-cyan-700',
+      white: 'bg-white border-b border-gray-300',
     };
     
     return headerClassMap[theme.name] || headerClassMap.blue;
@@ -210,6 +226,7 @@ export default function Layout({ children, title }: LayoutProps) {
       pink: 'bg-gradient-to-b from-pink-600 to-pink-700',
       teal: 'bg-gradient-to-b from-teal-600 to-teal-700',
       cyan: 'bg-gradient-to-b from-cyan-600 to-cyan-700',
+      white: 'bg-white border-r border-gray-300',
     };
     
     return sidebarBgMap[theme.name] || sidebarBgMap.blue;
@@ -232,6 +249,7 @@ export default function Layout({ children, title }: LayoutProps) {
       pink: 'bg-pink-50',
       teal: 'bg-teal-50',
       cyan: 'bg-cyan-50',
+      white: 'bg-gray-50',
     };
     
     return pageBgMap[theme.name] || pageBgMap.blue;
@@ -330,6 +348,233 @@ export default function Layout({ children, title }: LayoutProps) {
 
   const quickActions = getQuickActions();
 
+  // Get route-specific quick action buttons
+  const getRouteQuickActions = () => {
+    const routeActions: Record<string, Array<{ label: string; icon: any; onClick: () => void }>> = {
+      '/company': [
+        {
+          label: 'Create Company',
+          icon: Building2,
+          onClick: () => {
+            // This will be handled by the Company page component
+            const event = new CustomEvent('openCreateCompanyModal');
+            window.dispatchEvent(event);
+          }
+        }
+      ],
+      '/setup': [
+        {
+          label: 'Setup',
+          icon: Wrench,
+          onClick: () => navigate('/setup/configuration')
+        },
+        {
+          label: 'Download Setup',
+          icon: Download,
+          onClick: () => navigate('/setup/download')
+        },
+        {
+          label: 'Backup Data',
+          icon: HardDrive,
+          onClick: () => navigate('/setup/backup')
+        },
+        {
+          label: 'Split Financial Year',
+          icon: Calendar,
+          onClick: () => navigate('/setup/split-financial-year')
+        },
+        {
+          label: 'Version Update',
+          icon: RefreshCw,
+          onClick: () => navigate('/setup/version-updates')
+        }
+      ],
+      '/setup/configuration': [
+        {
+          label: 'Setup',
+          icon: Wrench,
+          onClick: () => navigate('/setup/configuration')
+        },
+        {
+          label: 'Download Setup',
+          icon: Download,
+          onClick: () => navigate('/setup/download')
+        },
+        {
+          label: 'Backup Data',
+          icon: HardDrive,
+          onClick: () => navigate('/setup/backup')
+        },
+        {
+          label: 'Split Financial Year',
+          icon: Calendar,
+          onClick: () => navigate('/setup/split-financial-year')
+        },
+        {
+          label: 'Version Update',
+          icon: RefreshCw,
+          onClick: () => navigate('/setup/version-updates')
+        }
+      ],
+      '/setup/download': [
+        {
+          label: 'Setup',
+          icon: Wrench,
+          onClick: () => navigate('/setup/configuration')
+        },
+        {
+          label: 'Download Setup',
+          icon: Download,
+          onClick: () => navigate('/setup/download')
+        },
+        {
+          label: 'Backup Data',
+          icon: HardDrive,
+          onClick: () => navigate('/setup/backup')
+        },
+        {
+          label: 'Split Financial Year',
+          icon: Calendar,
+          onClick: () => navigate('/setup/split-financial-year')
+        },
+        {
+          label: 'Version Update',
+          icon: RefreshCw,
+          onClick: () => navigate('/setup/version-updates')
+        }
+      ],
+      '/setup/backup': [
+        {
+          label: 'Setup',
+          icon: Wrench,
+          onClick: () => navigate('/setup/configuration')
+        },
+        {
+          label: 'Download Setup',
+          icon: Download,
+          onClick: () => navigate('/setup/download')
+        },
+        {
+          label: 'Backup Data',
+          icon: HardDrive,
+          onClick: () => navigate('/setup/backup')
+        },
+        {
+          label: 'Split Financial Year',
+          icon: Calendar,
+          onClick: () => navigate('/setup/split-financial-year')
+        },
+        {
+          label: 'Version Update',
+          icon: RefreshCw,
+          onClick: () => navigate('/setup/version-updates')
+        }
+      ],
+      '/setup/split-financial-year': [
+        {
+          label: 'Setup',
+          icon: Wrench,
+          onClick: () => navigate('/setup/configuration')
+        },
+        {
+          label: 'Download Setup',
+          icon: Download,
+          onClick: () => navigate('/setup/download')
+        },
+        {
+          label: 'Backup Data',
+          icon: HardDrive,
+          onClick: () => navigate('/setup/backup')
+        },
+        {
+          label: 'Split Financial Year',
+          icon: Calendar,
+          onClick: () => navigate('/setup/split-financial-year')
+        },
+        {
+          label: 'Version Update',
+          icon: RefreshCw,
+          onClick: () => navigate('/setup/version-updates')
+        }
+      ],
+      '/setup/version-updates': [
+        {
+          label: 'Setup',
+          icon: Wrench,
+          onClick: () => navigate('/setup/configuration')
+        },
+        {
+          label: 'Download Setup',
+          icon: Download,
+          onClick: () => navigate('/setup/download')
+        },
+        {
+          label: 'Backup Data',
+          icon: HardDrive,
+          onClick: () => navigate('/setup/backup')
+        },
+        {
+          label: 'Split Financial Year',
+          icon: Calendar,
+          onClick: () => navigate('/setup/split-financial-year')
+        },
+        {
+          label: 'Version Update',
+          icon: RefreshCw,
+          onClick: () => navigate('/setup/version-updates')
+        }
+      ],
+      '/admin-management': [
+        {
+          label: 'Create Admin',
+          icon: UserCheck,
+          onClick: () => {
+            const event = new CustomEvent('openCreateAdminModal');
+            window.dispatchEvent(event);
+          }
+        }
+      ],
+      '/dashboard': [
+        {
+          label: 'Dashboard',
+          icon: Home,
+          onClick: () => navigate('/dashboard')
+        }
+      ],
+      '/settings': [
+        {
+          label: 'Settings',
+          icon: Settings,
+          onClick: () => navigate('/settings')
+        }
+      ]
+    };
+
+    // Check for exact match first
+    if (routeActions[location.pathname]) {
+      return routeActions[location.pathname];
+    }
+
+    // Check for partial match (for nested routes)
+    for (const route in routeActions) {
+      if (location.pathname.startsWith(route)) {
+        return routeActions[route];
+      }
+    }
+
+    // Default: return tracked quick actions if no route-specific actions
+    return quickActions.slice(0, 7).map(action => ({
+      label: action.label,
+      icon: action.icon,
+      onClick: () => {
+        trackMenuClick(action.path);
+        navigate(action.path);
+      }
+    }));
+  };
+
+  const routeQuickActions = getRouteQuickActions();
+
   return (
     <div className={`flex h-screen ${getPageBgClasses()} overflow-hidden`}>
       {/* Sidebar */}
@@ -343,20 +588,20 @@ export default function Layout({ children, title }: LayoutProps) {
           !sidebarOpen ? 'px-2' : ''
         }`}>
           {sidebarOpen && (
-            <h1 className="text-xl font-bold text-white truncate">S.D.Taxation</h1>
+            <h1 className={`text-xl font-bold truncate ${theme.name === 'white' ? 'text-gray-900' : 'text-white'}`}>S.D.Taxation</h1>
           )}
           {!sidebarOpen && (
-            <div className="text-white font-bold text-lg">SD</div>
+            <div className={`font-bold text-lg ${theme.name === 'white' ? 'text-gray-900' : 'text-white'}`}>SD</div>
           )}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="lg:hidden text-white hover:text-gray-200 p-1"
+            className={`lg:hidden p-1 ${theme.name === 'white' ? 'text-gray-900 hover:text-gray-700' : 'text-white hover:text-gray-200'}`}
           >
             <X size={24} />
           </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden lg:block text-white hover:text-gray-200 p-1"
+            className={`hidden lg:block p-1 ${theme.name === 'white' ? 'text-gray-900 hover:text-gray-700' : 'text-white hover:text-gray-200'}`}
           >
             {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
           </button>
@@ -366,7 +611,7 @@ export default function Layout({ children, title }: LayoutProps) {
           <nav className="space-y-2">
             <div className="pb-2">
               {sidebarOpen && (
-                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
+                <h3 className={`text-xs font-semibold uppercase tracking-wider mb-3 px-2 ${theme.name === 'white' ? 'text-gray-700' : 'text-white text-opacity-70'}`}>
                   Main Menu
                 </h3>
               )}
@@ -385,7 +630,7 @@ export default function Layout({ children, title }: LayoutProps) {
                     title={!sidebarOpen ? item.label : ''}
                   >
                     <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
-                    {sidebarOpen && <span className={isActive ? '' : 'text-white'}>{item.label}</span>}
+                    {sidebarOpen && <span className={isActive ? '' : (theme.name === 'white' ? 'text-gray-900' : 'text-white')}>{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -396,9 +641,9 @@ export default function Layout({ children, title }: LayoutProps) {
               })}
             </div>
 
-            <div className="pt-2 border-t border-white border-opacity-20">
+            <div className={`pt-2 border-t ${theme.name === 'white' ? 'border-gray-300' : 'border-white border-opacity-20'}`}>
               {sidebarOpen && (
-                <h3 className="text-xs font-semibold text-white text-opacity-70 uppercase tracking-wider mb-3 px-2">
+                <h3 className={`text-xs font-semibold uppercase tracking-wider mb-3 px-2 ${theme.name === 'white' ? 'text-gray-700' : 'text-white text-opacity-70'}`}>
                   TAX MODULES
                 </h3>
               )}
@@ -417,7 +662,7 @@ export default function Layout({ children, title }: LayoutProps) {
                     title={!sidebarOpen ? item.label : ''}
                   >
                     <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
-                    {sidebarOpen && <span className={`font-bold ${isActive ? '' : 'text-white'}`}>{item.label}</span>}
+                    {sidebarOpen && <span className={`font-bold ${isActive ? '' : (theme.name === 'white' ? 'text-gray-900' : 'text-white')}`}>{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -557,17 +802,22 @@ export default function Layout({ children, title }: LayoutProps) {
                                 <div className="flex items-center space-x-2">
                                   <div 
                                     className={`w-4 h-4 rounded-full ${
-                                      themeOption.name === 'blue' ? 'bg-blue-600' :
-                                      themeOption.name === 'purple' ? 'bg-purple-600' :
-                                      themeOption.name === 'green' ? 'bg-green-600' :
-                                      themeOption.name === 'orange' ? 'bg-orange-600' :
-                                      themeOption.name === 'red' ? 'bg-red-600' :
-                                      themeOption.name === 'indigo' ? 'bg-indigo-600' :
-                                      themeOption.name === 'black' ? 'bg-gray-900' :
-                                      themeOption.name === 'pink' ? 'bg-pink-600' :
-                                      themeOption.name === 'teal' ? 'bg-teal-600' :
-                                      themeOption.name === 'cyan' ? 'bg-cyan-600' :
-                                      'bg-blue-600'
+                                      (() => {
+                                        const colorMap: Record<string, string> = {
+                                          blue: 'bg-blue-600',
+                                          purple: 'bg-purple-600',
+                                          green: 'bg-green-600',
+                                          orange: 'bg-orange-600',
+                                          red: 'bg-red-600',
+                                          indigo: 'bg-indigo-600',
+                                          black: 'bg-gray-900',
+                                          pink: 'bg-pink-600',
+                                          teal: 'bg-teal-600',
+                                          cyan: 'bg-cyan-600',
+                                          white: 'bg-white border-2 border-gray-300',
+                                        };
+                                        return colorMap[themeOption.name] || 'bg-blue-600';
+                                      })()
                                     }`}
                                   />
                                   <span className="font-medium">{themeOption.displayName}</span>
@@ -602,8 +852,8 @@ export default function Layout({ children, title }: LayoutProps) {
             {/* Bottom Row: Shortcut Actions */}
             <div className="flex items-center space-x-2 overflow-x-auto pb-1">
               {/* Search Button */}
-              <button className="flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap">
-                <Search className={`${getDropdownIconClasses()}`} size={18} />
+              <button className="flex items-center justify-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap">
+                <Search className={`${getDropdownIconClasses()}`} size={16} />
               </button>
 
               {/* Year Dropdown */}
@@ -615,41 +865,32 @@ export default function Layout({ children, title }: LayoutProps) {
                   const nextIndex = (currentIndex + 1) % years.length;
                   setSelectedYear(years[nextIndex]);
                 }}
-                className="flex items-center space-x-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
+                className="flex items-center space-x-1.5 px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
               >
-                <span className="text-sm text-gray-700 dark:text-gray-300">{selectedYear}</span>
-                <ChevronDown size={16} className="text-gray-500 dark:text-gray-400" />
+                <span className="text-xs text-gray-700 dark:text-gray-300">{selectedYear}</span>
+                <ChevronDown size={14} className="text-gray-500 dark:text-gray-400" />
               </button>
 
-              {/* Dynamic Quick Action Buttons - Based on Sidebar Click Tracking */}
-              {quickActions.slice(0, 7).map((action) => {
+              {/* Route-Specific Quick Action Buttons */}
+              {routeQuickActions.map((action, index) => {
                 const ActionIcon = action.icon;
                 return (
                   <button
-                    key={action.path}
-                    onClick={() => {
-                      trackMenuClick(action.path);
-                      navigate(action.path);
-                    }}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium transition-colors whitespace-nowrap hover:opacity-90 relative ${getSidebarHeaderClasses()}`}
+                    key={`${action.label}-${index}`}
+                    onClick={action.onClick}
+                    className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-white text-sm font-medium transition-colors whitespace-nowrap hover:opacity-90 relative ${getSidebarHeaderClasses()}`}
                     title={action.label}
                   >
-                    <ActionIcon size={16} />
+                    <ActionIcon size={14} />
                     <span>{action.label}</span>
-                    <Plus size={16} />
-                    {/* Click count badge - commented out */}
-                    {/* {action.clickCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                        {action.clickCount}
-                      </span>
-                    )} */}
+                    <Plus size={12} />
                   </button>
                 );
               })}
 
               {/* Notification Bell */}
-              <button className={`flex items-center justify-center px-3 py-2 rounded-lg text-white transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
-                <Bell size={18} />
+              <button className={`flex items-center justify-center px-2.5 py-1.5 rounded-lg text-white transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
+                <Bell size={16} />
               </button>
             </div>
           </div>

@@ -26,6 +26,18 @@ export default function Company() {
   const [deletingCompany, setDeletingCompany] = useState<Company | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // Listen for custom event to open create company modal from header button
+  useEffect(() => {
+    const handleOpenCreateModal = () => {
+      setCreateModalOpen(true);
+    };
+
+    window.addEventListener('openCreateCompanyModal', handleOpenCreateModal);
+    return () => {
+      window.removeEventListener('openCreateCompanyModal', handleOpenCreateModal);
+    };
+  }, []);
+
   // Fetch companies from API
   const fetchCompanies = async () => {
     try {

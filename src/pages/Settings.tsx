@@ -17,6 +17,7 @@ export default function Settings() {
       pink: 'bg-pink-600',
       teal: 'bg-teal-600',
       cyan: 'bg-cyan-600',
+      white: 'bg-white border-2 border-gray-300',
     };
     return colorMap[themeName] || 'bg-blue-600';
   };
@@ -33,6 +34,7 @@ export default function Settings() {
       pink: 'border-pink-100',
       teal: 'border-teal-100',
       cyan: 'border-cyan-100',
+      white: 'border-gray-300',
     };
     return borderMap[themeName] || 'border-blue-100';
   };
@@ -49,6 +51,7 @@ export default function Settings() {
       pink: 'bg-pink-50',
       teal: 'bg-teal-50',
       cyan: 'bg-cyan-50',
+      white: 'bg-white',
     };
     return lightMap[themeName] || 'bg-blue-50';
   };
@@ -65,6 +68,7 @@ export default function Settings() {
       pink: 'text-pink-600',
       teal: 'text-teal-600',
       cyan: 'text-cyan-600',
+      white: 'text-gray-900',
     };
     return textMap[themeName] || 'text-blue-600';
   };
@@ -81,6 +85,7 @@ export default function Settings() {
       pink: 'border-pink-600',
       teal: 'border-teal-600',
       cyan: 'border-cyan-600',
+      white: 'border-gray-300',
     };
     return borderMap[themeName] || 'border-blue-600';
   };
@@ -88,39 +93,6 @@ export default function Settings() {
   return (
     <Layout title="Settings">
       <div className="space-y-6">
-        {/* Dark Mode Toggle - Commented Out */}
-        {/* <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 ${getThemeBorderClass(themeName)}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className={`p-2 rounded-lg ${getThemeLightClass(themeName)} dark:bg-gray-700`}>
-                {isDarkMode ? (
-                  <Moon className={getThemeTextClass(themeName)} size={24} />
-                ) : (
-                  <Sun className={getThemeTextClass(themeName)} size={24} />
-                )}
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Dark Mode</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Toggle dark mode for the entire application</p>
-              </div>
-            </div>
-            <button
-              onClick={toggleDarkMode}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                isDarkMode 
-                  ? `bg-${theme.colors.primary} focus:ring-${theme.colors.primary}` 
-                  : 'bg-gray-200 focus:ring-gray-500'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isDarkMode ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div> */}
-
         {/* Theme Selection */}
         <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700 ${getThemeBorderClass(themeName)}`}>
           <div className="flex items-center space-x-3 mb-6">
@@ -133,36 +105,28 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-2">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {availableThemes.map((availableTheme) => {
               const isSelected = themeName === availableTheme.name;
+              const isWhiteTheme = availableTheme.name === 'white';
               return (
                 <button
                   key={availableTheme.name}
                   onClick={() => setTheme(availableTheme.name)}
                   className={`
-                    relative p-4 rounded-lg border-2 transition-all duration-200
-                    ${isSelected 
-                      ? `${getThemeBorderActiveClass(availableTheme.name)} ${getThemeLightClass(availableTheme.name)} dark:bg-gray-700` 
-                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
-                    }
+                    w-full py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95
+                    ${getThemeColorClass(availableTheme.name)} 
+                    ${isWhiteTheme ? 'text-gray-900' : 'text-white'}
+                    ${isSelected ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-gray-500' : ''}
                   `}
                 >
-                  <div className="flex flex-col items-center space-y-3">
-                    <div className={`w-12 h-12 rounded-full ${getThemeColorClass(availableTheme.name)}`} />
-                    <span className={`font-semibold text-sm ${
-                      isSelected 
-                        ? getThemeTextClass(availableTheme.name)
-                        : 'text-gray-700 dark:text-gray-300'
-                    }`}>
-                      {availableTheme.displayName}
-                    </span>
-                    {isSelected && (
-                      <div className={`absolute top-2 right-2 p-1 rounded-full ${getThemeColorClass(availableTheme.name)}`}>
-                        <Check className="text-white" size={16} />
-                      </div>
-                    )}
-                  </div>
+                  <Palette size={18} />
+                  <span className="font-semibold">{availableTheme.displayName}</span>
+                  {isSelected && (
+                    <div className={`${isWhiteTheme ? 'bg-gray-200' : 'bg-white/20'} rounded-full p-0.5 ml-1`}>
+                      <Check size={14} />
+                    </div>
+                  )}
                 </button>
               );
             })}

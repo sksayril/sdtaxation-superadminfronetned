@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
-export type ThemeName = 'blue' | 'purple' | 'green' | 'orange' | 'red' | 'indigo' | 'black' | 'pink' | 'teal' | 'cyan';
+export type ThemeName = 'blue' | 'purple' | 'green' | 'orange' | 'red' | 'indigo' | 'black' | 'pink' | 'teal' | 'white';
 
 export interface Theme {
   name: ThemeName;
@@ -194,22 +194,22 @@ const themes: Record<ThemeName, Theme> = {
       hoverBg: 'gray-50',
     },
   },
-  cyan: {
-    name: 'cyan',
-    displayName: 'Cyan',
+  white: {
+    name: 'white',
+    displayName: 'White',
     colors: {
-      primary: 'cyan-600',
-      primaryDark: 'cyan-700',
-      primaryLight: 'cyan-50',
-      sidebarBg: 'from-cyan-600 to-cyan-700',
-      sidebarHeader: 'from-cyan-600 to-cyan-700',
+      primary: 'gray-900',
+      primaryDark: 'black',
+      primaryLight: 'gray-50',
+      sidebarBg: 'bg-white border-r border-gray-300',
+      sidebarHeader: 'bg-white border-b border-gray-300',
       cardBg: 'white',
-      cardBorder: 'border-cyan-100',
-      pageBg: 'cyan-50',
+      cardBorder: 'border-gray-200',
+      pageBg: 'gray-50',
       textPrimary: 'gray-900',
       textSecondary: 'gray-600',
-      activeBg: 'white',
-      activeText: 'cyan-600',
+      activeBg: 'gray-100',
+      activeText: 'gray-900',
       hoverBg: 'gray-50',
     },
   },
@@ -248,7 +248,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   //     document.documentElement.classList.remove('dark');
   //   }
   // }, [isDarkMode]);
-  
+
   // Set isDarkMode to false (disabled)
   const isDarkMode = false;
 
@@ -263,7 +263,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   //   setIsDarkMode(newDarkMode);
   //   localStorage.setItem('app-dark-mode', String(newDarkMode));
   // };
-  
+
   const toggleDarkMode = () => {
     // Dark mode is disabled
   };
