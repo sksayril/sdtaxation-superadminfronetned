@@ -41,16 +41,6 @@ function LoadingScreen() {
   );
 }
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
-  
-  if (loading) {
-    return <LoadingScreen />;
-  }
-  
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
-}
-
 function AppContent() {
   const { notifications, closeNotification, showSuccess, showError, showWarning, showInfo } = useNotification();
 
@@ -63,6 +53,17 @@ function AppContent() {
       showInfo
     });
   }, [showSuccess, showError, showWarning, showInfo]);
+
+  // ProtectedRoute component must be inside AppContent to access useAuth
+  function ProtectedRoute({ children }: { children: React.ReactNode }) {
+    const { isAuthenticated, loading } = useAuth();
+    
+    if (loading) {
+      return <LoadingScreen />;
+    }
+    
+    return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  }
 
   return (
     <>

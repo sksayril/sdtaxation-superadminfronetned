@@ -7,7 +7,7 @@ import DeleteCompanyModal from '../components/DeleteCompanyModal';
 import SkeletonLoader, { LoadingSpinner } from '../components/SkeletonLoader';
 import { apiService, type Company, type CreateCompanyRequest, type UpdateCompanyRequest } from '../services/api';
 import { toast } from '../utils/toast';
-import { Building2, Plus, Search, Edit, Trash2, RefreshCw, Eye, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Building2, Plus, Search, Edit, Trash2, RefreshCw, Eye } from 'lucide-react';
 
 export default function Company() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -25,6 +25,15 @@ export default function Company() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingCompany, setDeletingCompany] = useState<Company | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Format date as "11-02-2026" (day-month-year with dashes)
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear());
+    return `${day}-${month}-${year}`;
+  };
 
   // Listen for custom event to open create company modal from header button
   useEffect(() => {
@@ -513,7 +522,7 @@ export default function Company() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 dark:text-white">
-                          {new Date(company.createdAt).toLocaleDateString()}
+                          {formatDate(company.createdAt)}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                           by {company.created_by.name}
@@ -521,21 +530,28 @@ export default function Company() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
-                          <button 
-                            onClick={() => handleStatusToggle(company)}
-                            className={`p-1 transition-colors ${
-                              company.status === 'active'
-                                ? 'text-green-600 hover:text-green-800'
-                                : 'text-gray-400 hover:text-gray-600'
-                            }`}
-                            title={company.status === 'active' ? 'Set to Inactive' : 'Set to Active'}
-                          >
-                            {company.status === 'active' ? (
-                              <ToggleRight size={18} />
-                            ) : (
-                              <ToggleLeft size={18} />
-                            )}
-                          </button>
+                          <div className="flex items-center space-x-2">
+                            <button 
+                              onClick={() => handleStatusToggle(company)}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                                company.status === 'active'
+                                  ? 'bg-green-600 focus:ring-green-500'
+                                  : 'bg-gray-300 focus:ring-gray-400'
+                              }`}
+                              title={company.status === 'active' ? 'Click to set Inactive' : 'Click to set Active'}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  company.status === 'active' ? 'translate-x-6' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
+                            <span className={`text-sm font-medium ${
+                              company.status === 'active' ? 'text-green-700' : 'text-gray-600'
+                            }`}>
+                              {company.status === 'active' ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
                           <button 
                             onClick={() => handleViewCompany(company._id)}
                             className="p-1 text-green-600 hover:text-green-800 transition-colors"

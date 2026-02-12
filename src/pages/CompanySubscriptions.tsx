@@ -158,10 +158,10 @@ export default function CompanySubscriptions() {
 
   // Filter subscriptions
   const filteredSubscriptions = subscriptions.filter(sub => {
-    const matchesSearch = sub.company.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         sub.plan.planName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (sub.company?.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+                         (sub.plan?.planName?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
     const matchesStatus = filterStatus === 'all' || sub.status === filterStatus;
-    const matchesCompany = !selectedCompany || sub.company._id === selectedCompany;
+    const matchesCompany = !selectedCompany || sub.company?._id === selectedCompany;
     return matchesSearch && matchesStatus && matchesCompany;
   });
 
@@ -311,9 +311,9 @@ export default function CompanySubscriptions() {
                           <Building2 className="h-5 w-5 text-gray-400 mr-2" />
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {subscription.company.company_name}
+                              {subscription.company?.company_name || 'N/A'}
                             </div>
-                            {subscription.company.company_email && (
+                            {subscription.company?.company_email && (
                               <div className="text-sm text-gray-500">
                                 {subscription.company.company_email}
                               </div>

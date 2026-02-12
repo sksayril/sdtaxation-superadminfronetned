@@ -1,5 +1,6 @@
 // API Configuration and Service
 const API_BASE_URL = 'https://api.sdtaxation.com';
+// const API_BASE_URL = 'https://7cvccltb-3001.inc1.devtunnels.ms';
 
 // Types for API responses
 export interface LoginRequest {
@@ -139,10 +140,16 @@ export interface DeleteCompanyResponse {
 
 // Permission types
 export interface ModulePermissions {
-  create: boolean;
-  read: boolean;
-  update: boolean;
-  delete: boolean;
+  access: boolean;
+  canCreate: boolean;
+  canRead: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
+  // Legacy support
+  create?: boolean;
+  read?: boolean;
+  update?: boolean;
+  delete?: boolean;
 }
 
 export interface AdminPermissions {

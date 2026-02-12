@@ -302,22 +302,28 @@ export default function AdminDetailsModal({ isOpen, onClose, admin }: AdminDetai
                 {(['hrm', 'payroll', 'crm', 'erp'] as const).map((module) => {
                   const modulePermissions = admin.permissions![module];
                   const moduleName = module === 'hrm' ? 'HRM' : module === 'payroll' ? 'Payroll' : module === 'crm' ? 'CRM' : 'ERP';
+                  const hasAccess = (modulePermissions as any)?.access || false;
                   
                   return (
-                    <div key={module} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                    <div key={module} className={`border rounded-xl p-4 ${
+                      hasAccess ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'
+                    }`}>
                       <h5 className="text-base font-semibold text-gray-900 mb-3 uppercase">
                         {moduleName}
                       </h5>
                       <div className="grid grid-cols-2 gap-2">
-                        {(['create', 'read', 'update', 'delete'] as const).map((permission) => {
-                          const hasPermission = modulePermissions[permission];
-                          const permissionName = permission === 'create' ? 'Create' : 
-                                                 permission === 'read' ? 'Read' : 
-                                                 permission === 'update' ? 'Update' : 'Delete';
+                        {([
+                          { apiKey: 'canCreate', legacyKey: 'create', label: 'Create' },
+                          { apiKey: 'canRead', legacyKey: 'read', label: 'Read' },
+                          { apiKey: 'canUpdate', legacyKey: 'update', label: 'Update' },
+                          { apiKey: 'canDelete', legacyKey: 'delete', label: 'Delete' }
+                        ] as const).map(({ apiKey, legacyKey, label }) => {
+                          // Check both new API format (canCreate) and legacy format (create)
+                          const hasPermission = (modulePermissions as any)[apiKey] || (modulePermissions as any)[legacyKey] || false;
                           
                           return (
                             <div
-                              key={permission}
+                              key={apiKey}
                               className={`flex items-center space-x-2 p-2 rounded-lg ${
                                 hasPermission 
                                   ? 'bg-green-50 border border-green-200' 
@@ -325,14 +331,14 @@ export default function AdminDetailsModal({ isOpen, onClose, admin }: AdminDetai
                               }`}
                             >
                               {hasPermission ? (
-                                <CheckSquare className="text-green-600" size={16} />
+                                <CheckSquare className="text-green-600" size={18} fill="currentColor" />
                               ) : (
                                 <div className="w-4 h-4 border-2 border-gray-300 rounded"></div>
                               )}
                               <span className={`text-xs font-medium ${
                                 hasPermission ? 'text-green-800' : 'text-gray-500'
                               }`}>
-                                {permissionName}
+                                {label}
                               </span>
                             </div>
                           );

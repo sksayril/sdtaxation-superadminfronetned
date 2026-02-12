@@ -28,7 +28,6 @@ import {
   Lock,
   CheckSquare,
   Palette,
-  UserCircle,
   Wrench,
   Search,
   Plus,
@@ -300,7 +299,6 @@ export default function Layout({ children, title }: LayoutProps) {
     { path: '/dashboard', label: 'Dashboard', icon: Home },
     { path: '/setup', label: 'Setup', icon: Wrench },
     { path: '/company', label: 'Company', icon: Building2 },
-    { path: '/users', label: 'Users', icon: UserCircle },
     { path: '/admin-management', label: 'Admin Management', icon: Shield },
     { path: '/subscription-plans', label: 'Subscription Plans', icon: Package },
     { path: '/company-subscriptions', label: 'Company Subscriptions', icon: CreditCard },
@@ -584,11 +582,11 @@ export default function Layout({ children, title }: LayoutProps) {
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${sidebarOpen ? 'w-64' : 'w-16 lg:w-16'}
       `}>
-        <div className={`flex items-center justify-between h-16 px-4 flex-shrink-0 ${getSidebarHeaderClasses()} ${
+        <div className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'} h-16 px-4 flex-shrink-0 ${getSidebarHeaderClasses()} ${
           !sidebarOpen ? 'px-2' : ''
         }`}>
           {sidebarOpen && (
-            <h1 className={`text-xl font-bold truncate ${theme.name === 'white' ? 'text-gray-900' : 'text-white'}`}>S.D.Taxation</h1>
+            <h1 className={`text-xl font-bold whitespace-nowrap ${theme.name === 'white' ? 'text-gray-900' : 'text-white'}`}>S.D.Taxation Associate</h1>
           )}
           {!sidebarOpen && (
             <div className={`font-bold text-lg ${theme.name === 'white' ? 'text-gray-900' : 'text-white'}`}>SD</div>
@@ -697,15 +695,22 @@ export default function Layout({ children, title }: LayoutProps) {
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <Calendar size={16} />
-                  <span>{new Date().toLocaleDateString()}</span>
+                  <span>{(() => {
+                    const now = new Date();
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const month = monthNames[now.getMonth()];
+                    const year = String(now.getFullYear()).slice(-2);
+                    return `${day}/${month}/${year}`;
+                  })()}</span>
                 </div>
                 <div className="flex items-center space-x-3 relative" ref={userDropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 text-base text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <User size={16} />
-                  <span className="lowercase">{user?.name || 'superadmin'}</span>
+                  <User size={18} />
+                  <span className="font-medium">{user?.name || 'superadmin'}</span>
                   <ChevronDown 
                     size={16} 
                     className={`text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
@@ -744,21 +749,21 @@ export default function Layout({ children, title }: LayoutProps) {
                         <span className="font-bold">Change Password</span>
                       </button>
                       <div className="relative">
-                        <button
+                        {/* <button
                           onClick={() => setThemeMenuOpen(!themeMenuOpen)}
                           className={`w-full flex items-center justify-between px-4 py-3 text-sm transition-colors ${getDropdownItemClasses()}`}
-                        >
-                          <div className="flex items-center space-x-3">
+                        > */}
+                          {/* <div className="flex items-center space-x-3">
                             <Palette size={16} className={getDropdownIconClasses()} />
                             <span className="font-bold dark:text-gray-300">Theme Settings</span>
-                          </div>
-                          <ChevronDown 
+                          </div> */}
+                          {/* <ChevronDown 
                             size={16} 
                             className={`text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                               themeMenuOpen ? 'rotate-180' : ''
                             }`}
-                          />
-                        </button>
+                          /> */}
+                        {/* </button> */}
                         {themeMenuOpen && (
                           <div className="pl-4 pr-2 py-2 max-h-80 overflow-y-auto space-y-1">
                             {/* Dark Mode Toggle - Commented Out */}

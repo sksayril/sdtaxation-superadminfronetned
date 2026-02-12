@@ -388,6 +388,9 @@ export default function AdminManagement() {
                       Company
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">
+                      Permissions
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">
@@ -448,6 +451,28 @@ export default function AdminManagement() {
                           <div className="text-sm text-gray-400 italic">
                             No company assigned
                           </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-5">
+                        {admin.permissions ? (
+                          <div className="flex flex-wrap gap-1">
+                            {Object.entries(admin.permissions).map(([module, perms]) => (
+                              perms.access && (
+                                <span
+                                  key={module}
+                                  className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-800"
+                                  title={`${module.toUpperCase()}: Create: ${perms.canCreate ? 'Yes' : 'No'}, Read: ${perms.canRead ? 'Yes' : 'No'}, Update: ${perms.canUpdate ? 'Yes' : 'No'}, Delete: ${perms.canDelete ? 'Yes' : 'No'}`}
+                                >
+                                  {module.toUpperCase()}
+                                </span>
+                              )
+                            ))}
+                            {Object.values(admin.permissions).every(p => !p.access) && (
+                              <span className="text-xs text-gray-400 italic">No permissions</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">No permissions</span>
                         )}
                       </td>
                       <td className="px-6 py-5 whitespace-nowrap">
