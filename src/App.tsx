@@ -14,6 +14,8 @@ import BackupData from './pages/BackupData';
 import SplitFinancialYear from './pages/SplitFinancialYear';
 import VersionUpdates from './pages/VersionUpdates';
 import Company from './pages/Company';
+import CompanyDetails from './pages/CompanyDetails';
+import EditCompany from './pages/EditCompany';
 import Users from './pages/Users';
 import AdminManagement from './pages/AdminManagement';
 import CRM from './pages/CRM';
@@ -108,6 +110,16 @@ function AppContent() {
           <Route path="/company" element={
             <ProtectedRoute>
               <Company />
+            </ProtectedRoute>
+          } />
+          <Route path="/company/:id" element={
+            <ProtectedRoute>
+              <CompanyDetails />
+            </ProtectedRoute>
+          } />
+          <Route path="/company/:id/edit" element={
+            <ProtectedRoute>
+              <EditCompany />
             </ProtectedRoute>
           } />
           <Route path="/users" element={

@@ -6,15 +6,11 @@ import LogoutConfirmation from './LogoutConfirmation';
 import {
   Home,
   Building2,
-  Users,
   Package,
-  UserCheck,
-  DollarSign,
-  FileText,
   Settings,
-  Calculator,
-  Receipt,
-  FileBarChart,
+  Shield,
+  CreditCard,
+  Wrench,
   User,
   LogOut,
   Menu,
@@ -23,18 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Shield,
-  CreditCard,
   Lock,
   CheckSquare,
-  Palette,
-  Wrench,
-  Search,
-  Plus,
-  Bell,
-  Download,
-  HardDrive,
-  RefreshCw,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -52,12 +38,6 @@ export default function Layout({ children, title }: LayoutProps) {
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
-  const [selectedYear, setSelectedYear] = useState('2025 - 26');
-  const [menuClickCounts, setMenuClickCounts] = useState<Record<string, number>>(() => {
-    // Load click counts from localStorage
-    const saved = localStorage.getItem('menu-click-counts');
-    return saved ? JSON.parse(saved) : {};
-  });
   const userDropdownRef = useRef<HTMLDivElement>(null);
   
   // Get active menu item classes based on theme
@@ -302,276 +282,10 @@ export default function Layout({ children, title }: LayoutProps) {
     { path: '/admin-management', label: 'Admin Management', icon: Shield },
     { path: '/subscription-plans', label: 'Subscription Plans', icon: Package },
     { path: '/company-subscriptions', label: 'Company Subscriptions', icon: CreditCard },
-    { path: '/crm', label: 'CRM', icon: Users },
-    { path: '/erp', label: 'ERP', icon: Package },
-    { path: '/hrm', label: 'HRM', icon: UserCheck },
-    { path: '/payroll', label: 'Payroll', icon: DollarSign },
-    { path: '/reports', label: 'Reports', icon: FileText },
     { path: '/settings', label: 'Settings', icon: Settings },
   ];
 
-  const taxMenuItems = [
-    { path: '/gst', label: 'GST', icon: Calculator },
-    { path: '/tds', label: 'TDS', icon: Receipt },
-    { path: '/itr', label: 'ITR', icon: FileBarChart },
-  ];
 
-  // Track menu item click
-  const trackMenuClick = (path: string) => {
-    setMenuClickCounts((prev) => {
-      const newCounts = {
-        ...prev,
-        [path]: (prev[path] || 0) + 1,
-      };
-      // Save to localStorage
-      localStorage.setItem('menu-click-counts', JSON.stringify(newCounts));
-      return newCounts;
-    });
-  };
-
-  // Get top 6 most clicked menu items for quick actions
-  const getQuickActions = () => {
-    const allMenuItems = [...menuItems, ...taxMenuItems];
-    const quickActions = allMenuItems
-      .map((item) => ({
-        ...item,
-        clickCount: menuClickCounts[item.path] || 0,
-      }))
-      .filter((item) => item.clickCount > 0) // Only show items that have been clicked
-      .sort((a, b) => b.clickCount - a.clickCount) // Sort by click count descending
-      .slice(0, 6); // Get top 6
-
-    return quickActions;
-  };
-
-  const quickActions = getQuickActions();
-
-  // Get route-specific quick action buttons
-  const getRouteQuickActions = () => {
-    const routeActions: Record<string, Array<{ label: string; icon: any; onClick: () => void }>> = {
-      '/company': [
-        {
-          label: 'Create Company',
-          icon: Building2,
-          onClick: () => {
-            // This will be handled by the Company page component
-            const event = new CustomEvent('openCreateCompanyModal');
-            window.dispatchEvent(event);
-          }
-        }
-      ],
-      '/setup': [
-        {
-          label: 'Setup',
-          icon: Wrench,
-          onClick: () => navigate('/setup/configuration')
-        },
-        {
-          label: 'Download Setup',
-          icon: Download,
-          onClick: () => navigate('/setup/download')
-        },
-        {
-          label: 'Backup Data',
-          icon: HardDrive,
-          onClick: () => navigate('/setup/backup')
-        },
-        {
-          label: 'Split Financial Year',
-          icon: Calendar,
-          onClick: () => navigate('/setup/split-financial-year')
-        },
-        {
-          label: 'Version Update',
-          icon: RefreshCw,
-          onClick: () => navigate('/setup/version-updates')
-        }
-      ],
-      '/setup/configuration': [
-        {
-          label: 'Setup',
-          icon: Wrench,
-          onClick: () => navigate('/setup/configuration')
-        },
-        {
-          label: 'Download Setup',
-          icon: Download,
-          onClick: () => navigate('/setup/download')
-        },
-        {
-          label: 'Backup Data',
-          icon: HardDrive,
-          onClick: () => navigate('/setup/backup')
-        },
-        {
-          label: 'Split Financial Year',
-          icon: Calendar,
-          onClick: () => navigate('/setup/split-financial-year')
-        },
-        {
-          label: 'Version Update',
-          icon: RefreshCw,
-          onClick: () => navigate('/setup/version-updates')
-        }
-      ],
-      '/setup/download': [
-        {
-          label: 'Setup',
-          icon: Wrench,
-          onClick: () => navigate('/setup/configuration')
-        },
-        {
-          label: 'Download Setup',
-          icon: Download,
-          onClick: () => navigate('/setup/download')
-        },
-        {
-          label: 'Backup Data',
-          icon: HardDrive,
-          onClick: () => navigate('/setup/backup')
-        },
-        {
-          label: 'Split Financial Year',
-          icon: Calendar,
-          onClick: () => navigate('/setup/split-financial-year')
-        },
-        {
-          label: 'Version Update',
-          icon: RefreshCw,
-          onClick: () => navigate('/setup/version-updates')
-        }
-      ],
-      '/setup/backup': [
-        {
-          label: 'Setup',
-          icon: Wrench,
-          onClick: () => navigate('/setup/configuration')
-        },
-        {
-          label: 'Download Setup',
-          icon: Download,
-          onClick: () => navigate('/setup/download')
-        },
-        {
-          label: 'Backup Data',
-          icon: HardDrive,
-          onClick: () => navigate('/setup/backup')
-        },
-        {
-          label: 'Split Financial Year',
-          icon: Calendar,
-          onClick: () => navigate('/setup/split-financial-year')
-        },
-        {
-          label: 'Version Update',
-          icon: RefreshCw,
-          onClick: () => navigate('/setup/version-updates')
-        }
-      ],
-      '/setup/split-financial-year': [
-        {
-          label: 'Setup',
-          icon: Wrench,
-          onClick: () => navigate('/setup/configuration')
-        },
-        {
-          label: 'Download Setup',
-          icon: Download,
-          onClick: () => navigate('/setup/download')
-        },
-        {
-          label: 'Backup Data',
-          icon: HardDrive,
-          onClick: () => navigate('/setup/backup')
-        },
-        {
-          label: 'Split Financial Year',
-          icon: Calendar,
-          onClick: () => navigate('/setup/split-financial-year')
-        },
-        {
-          label: 'Version Update',
-          icon: RefreshCw,
-          onClick: () => navigate('/setup/version-updates')
-        }
-      ],
-      '/setup/version-updates': [
-        {
-          label: 'Setup',
-          icon: Wrench,
-          onClick: () => navigate('/setup/configuration')
-        },
-        {
-          label: 'Download Setup',
-          icon: Download,
-          onClick: () => navigate('/setup/download')
-        },
-        {
-          label: 'Backup Data',
-          icon: HardDrive,
-          onClick: () => navigate('/setup/backup')
-        },
-        {
-          label: 'Split Financial Year',
-          icon: Calendar,
-          onClick: () => navigate('/setup/split-financial-year')
-        },
-        {
-          label: 'Version Update',
-          icon: RefreshCw,
-          onClick: () => navigate('/setup/version-updates')
-        }
-      ],
-      '/admin-management': [
-        {
-          label: 'Create Admin',
-          icon: UserCheck,
-          onClick: () => {
-            const event = new CustomEvent('openCreateAdminModal');
-            window.dispatchEvent(event);
-          }
-        }
-      ],
-      '/dashboard': [
-        {
-          label: 'Dashboard',
-          icon: Home,
-          onClick: () => navigate('/dashboard')
-        }
-      ],
-      '/settings': [
-        {
-          label: 'Settings',
-          icon: Settings,
-          onClick: () => navigate('/settings')
-        }
-      ]
-    };
-
-    // Check for exact match first
-    if (routeActions[location.pathname]) {
-      return routeActions[location.pathname];
-    }
-
-    // Check for partial match (for nested routes)
-    for (const route in routeActions) {
-      if (location.pathname.startsWith(route)) {
-        return routeActions[route];
-      }
-    }
-
-    // Default: return tracked quick actions if no route-specific actions
-    return quickActions.slice(0, 7).map(action => ({
-      label: action.label,
-      icon: action.icon,
-      onClick: () => {
-        trackMenuClick(action.path);
-        navigate(action.path);
-      }
-    }));
-  };
-
-  const routeQuickActions = getRouteQuickActions();
 
   return (
     <div className={`flex h-screen ${getPageBgClasses()} overflow-hidden`}>
@@ -620,7 +334,6 @@ export default function Layout({ children, title }: LayoutProps) {
                   <button
                     key={item.path}
                     onClick={() => {
-                      trackMenuClick(item.path);
                       navigate(item.path);
                       setMobileMenuOpen(false);
                     }}
@@ -629,38 +342,6 @@ export default function Layout({ children, title }: LayoutProps) {
                   >
                     <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
                     {sidebarOpen && <span className={isActive ? '' : (theme.name === 'white' ? 'text-gray-900' : 'text-white')}>{item.label}</span>}
-                    {!sidebarOpen && (
-                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                        {item.label}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className={`pt-2 border-t ${theme.name === 'white' ? 'border-gray-300' : 'border-white border-opacity-20'}`}>
-              {sidebarOpen && (
-                <h3 className={`text-xs font-semibold uppercase tracking-wider mb-3 px-2 ${theme.name === 'white' ? 'text-gray-700' : 'text-white text-opacity-70'}`}>
-                  TAX MODULES
-                </h3>
-              )}
-              {taxMenuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => {
-                      trackMenuClick(item.path);
-                      navigate(item.path);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative ${getActiveMenuClasses(isActive)} ${!sidebarOpen ? 'justify-center' : ''}`}
-                    title={!sidebarOpen ? item.label : ''}
-                  >
-                    <Icon size={20} className={`${sidebarOpen ? 'mr-3' : ''} ${getInactiveIconClasses(isActive)}`} />
-                    {sidebarOpen && <span className={`font-bold ${isActive ? '' : (theme.name === 'white' ? 'text-gray-900' : 'text-white')}`}>{item.label}</span>}
                     {!sidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -854,50 +535,6 @@ export default function Layout({ children, title }: LayoutProps) {
               </div>
             </div>
 
-            {/* Bottom Row: Shortcut Actions */}
-            <div className="flex items-center space-x-2 overflow-x-auto pb-1">
-              {/* Search Button */}
-              <button className="flex items-center justify-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap">
-                <Search className={`${getDropdownIconClasses()}`} size={16} />
-              </button>
-
-              {/* Year Dropdown */}
-              <button 
-                onClick={() => {
-                  // Year dropdown functionality can be added here
-                  const years = ['2024 - 25', '2025 - 26', '2026 - 27'];
-                  const currentIndex = years.indexOf(selectedYear);
-                  const nextIndex = (currentIndex + 1) % years.length;
-                  setSelectedYear(years[nextIndex]);
-                }}
-                className="flex items-center space-x-1.5 px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
-              >
-                <span className="text-xs text-gray-700 dark:text-gray-300">{selectedYear}</span>
-                <ChevronDown size={14} className="text-gray-500 dark:text-gray-400" />
-              </button>
-
-              {/* Route-Specific Quick Action Buttons */}
-              {routeQuickActions.map((action, index) => {
-                const ActionIcon = action.icon;
-                return (
-                  <button
-                    key={`${action.label}-${index}`}
-                    onClick={action.onClick}
-                    className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-white text-sm font-medium transition-colors whitespace-nowrap hover:opacity-90 relative ${getSidebarHeaderClasses()}`}
-                    title={action.label}
-                  >
-                    <ActionIcon size={14} />
-                    <span>{action.label}</span>
-                    <Plus size={12} />
-                  </button>
-                );
-              })}
-
-              {/* Notification Bell */}
-              <button className={`flex items-center justify-center px-2.5 py-1.5 rounded-lg text-white transition-colors whitespace-nowrap ${getSidebarHeaderClasses()}`}>
-                <Bell size={16} />
-              </button>
-            </div>
           </div>
         </header>
 

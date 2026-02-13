@@ -1,27 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import CreateCompanyModal from '../components/CreateCompanyModal';
-import CompanyDetailsModal from '../components/CompanyDetailsModal';
-import EditCompanyModal from '../components/EditCompanyModal';
 import DeleteCompanyModal from '../components/DeleteCompanyModal';
 import SkeletonLoader, { LoadingSpinner } from '../components/SkeletonLoader';
-import { apiService, type Company, type CreateCompanyRequest, type UpdateCompanyRequest } from '../services/api';
+import { apiService, type Company, type CreateCompanyRequest } from '../services/api';
 import { toast } from '../utils/toast';
 import { Building2, Plus, Search, Edit, Trash2, RefreshCw, Eye } from 'lucide-react';
 
 export default function Company() {
+  const navigate = useNavigate();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingCompany, setEditingCompany] = useState<Company | null>(null);
-  const [editLoading, setEditLoading] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingCompany, setDeletingCompany] = useState<Company | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -192,101 +186,16 @@ export default function Company() {
     }
   };
 
-  // Handle view company details
-  const handleViewCompany = async (companyId: string) => {
-    try {
-      setDetailsLoading(true);
-      setDetailsModalOpen(true);
-      setSelectedCompany(null); // Clear previous data
-      
-      const response = await apiService.getCompanyById(companyId);
-      if (response.success) {
-        setSelectedCompany(response.data);
-        toast.success(
-          'Company details loaded successfully!',
-          '👁️ Details Loaded'
-        );
-      } else {
-        toast.error(
-          'Failed to fetch company details',
-          '❌ Fetch Error'
-        );
-        setDetailsModalOpen(false);
-      }
-    } catch (error: any) {
-      console.error('Error fetching company details:', error);
-      toast.error(
-        'Failed to fetch company details. Please try again.',
-        '❌ Network Error'
-      );
-      setDetailsModalOpen(false);
-    } finally {
-      setDetailsLoading(false);
-    }
+  // Handle view company details - navigate to details page
+  const handleViewCompany = (companyId: string) => {
+    navigate(`/company/${companyId}`);
   };
 
-  // Handle edit company
-  const handleEditCompany = async (companyId: string) => {
-    try {
-      setEditLoading(true);
-      setEditModalOpen(true);
-      setEditingCompany(null); // Clear previous data
-      
-      const response = await apiService.getCompanyById(companyId);
-      if (response.success) {
-        setEditingCompany(response.data);
-        toast.success(
-          'Company data loaded for editing!',
-          '✏️ Edit Mode'
-        );
-      } else {
-        toast.error(
-          'Failed to fetch company data for editing',
-          '❌ Fetch Error'
-        );
-        setEditModalOpen(false);
-      }
-    } catch (error: any) {
-      console.error('Error fetching company for editing:', error);
-      toast.error(
-        'Failed to fetch company data. Please try again.',
-        '❌ Network Error'
-      );
-      setEditModalOpen(false);
-    } finally {
-      setEditLoading(false);
-    }
+  // Handle edit company - navigate to edit page
+  const handleEditCompany = (companyId: string) => {
+    navigate(`/company/${companyId}/edit`);
   };
 
-  // Handle update company
-  const handleUpdateCompany = async (companyId: string, companyData: UpdateCompanyRequest) => {
-    try {
-      setEditLoading(true);
-      const response = await apiService.updateCompany(companyId, companyData);
-      if (response.success) {
-        toast.success(
-          'Company updated successfully!',
-          '✅ Update Success'
-        );
-        setEditModalOpen(false);
-        // Refresh the companies list
-        await fetchCompanies();
-      } else {
-        toast.error(
-          response.message || 'Failed to update company',
-          '❌ Update Failed'
-        );
-      }
-    } catch (error: any) {
-      console.error('Error updating company:', error);
-      toast.error(
-        'Failed to update company. Please try again.',
-        '❌ Network Error'
-      );
-    } finally {
-      setEditLoading(false);
-    }
-  };
 
   // Handle delete company
   const handleDeleteCompany = async (companyId: string) => {
@@ -553,25 +462,30 @@ export default function Company() {
                             </span>
                           </div>
                           <button 
-                            onClick={() => handleViewCompany(company._id)}
-                            className="p-1 text-green-600 hover:text-green-800 transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleViewCompany(company._id);
+                            }}
+                            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                             title="View Company Details"
+                            type="button"
                           >
-                            <Eye size={16} />
+                            <Eye size={18} />
                           </button>
                           <button 
                             onClick={() => handleEditCompany(company._id)}
-                            className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                             title="Edit Company"
                           >
-                            <Edit size={16} />
+                            <Edit size={18} />
                           </button>
                           <button 
                             onClick={() => handleDeleteClick(company._id)}
-                            className="p-1 text-red-600 hover:text-red-800 transition-colors"
+                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title="Delete Company"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </td>
@@ -589,23 +503,6 @@ export default function Company() {
           onClose={() => setCreateModalOpen(false)}
           onSubmit={handleCreateCompany}
           loading={createLoading}
-        />
-
-        {/* Company Details Modal */}
-        <CompanyDetailsModal
-          isOpen={detailsModalOpen}
-          onClose={() => setDetailsModalOpen(false)}
-          company={selectedCompany}
-          loading={detailsLoading}
-        />
-
-        {/* Edit Company Modal */}
-        <EditCompanyModal
-          isOpen={editModalOpen}
-          onClose={() => setEditModalOpen(false)}
-          onSubmit={handleUpdateCompany}
-          company={editingCompany}
-          loading={editLoading}
         />
 
         {/* Delete Company Modal */}

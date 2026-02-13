@@ -64,12 +64,23 @@ export interface Company {
   company_email: string;
   company_phone: string;
   company_address: CompanyAddress;
-  company_logo?: string;
-  company_website?: string;
+  company_logo?: string | null;
+  company_website?: string | null;
   gstNumber?: string;
   fiscalYear?: string;
   industry?: string;
-  tdsApplicable?: boolean; // TDS Applicable toggle
+  industries?: string | null;
+  constitution_of_business?: string | null;
+  tdsApplicable?: boolean;
+  tdsNumber?: string | null;
+  professional?: boolean;
+  professionalNumber?: string | null;
+  epf?: boolean;
+  epfNumber?: string | null;
+  pf?: boolean;
+  pfNumber?: string | null;
+  esic?: boolean;
+  esicNumber?: string | null;
   status: string;
   created_by: {
     _id: string;

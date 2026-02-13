@@ -75,12 +75,10 @@ export default function CreateCompanyModal({
   const [isTdsApplicable, setIsTdsApplicable] = useState<boolean>(false);
   const [isProfessional, setIsProfessional] = useState<boolean>(false);
   const [isEpf, setIsEpf] = useState<boolean>(false);
-  const [isPf, setIsPf] = useState<boolean>(false);
   const [isEsic, setIsEsic] = useState<boolean>(false);
   const [tdsNumber, setTdsNumber] = useState<string>('');
   const [professionalNumber, setProfessionalNumber] = useState<string>('');
   const [epfNumber, setEpfNumber] = useState<string>('');
-  const [pfNumber, setPfNumber] = useState<string>('');
   const [esicNumber, setEsicNumber] = useState<string>('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -290,11 +288,6 @@ export default function CreateCompanyModal({
       newErrors.epfNumber = 'EPF Number is required when EPF is enabled';
     }
 
-    // Validate PF Number (required if PF is true)
-    if (isPf && !pfNumber.trim()) {
-      newErrors.pfNumber = 'PF Number is required when PF is enabled';
-    }
-
     // Validate ESIC Number (required if ESIC is true)
     if (isEsic && !esicNumber.trim()) {
       newErrors.esicNumber = 'ESIC Number is required when ESIC is enabled';
@@ -320,8 +313,6 @@ export default function CreateCompanyModal({
         professionalNumber: isProfessional ? professionalNumber : undefined,
         epf: isEpf,
         epfNumber: isEpf ? epfNumber : undefined,
-        pf: isPf,
-        pfNumber: isPf ? pfNumber : undefined,
         esic: isEsic,
         esicNumber: isEsic ? esicNumber : undefined,
       };
@@ -352,12 +343,10 @@ export default function CreateCompanyModal({
       setIsTdsApplicable(false);
       setIsProfessional(false);
       setIsEpf(false);
-      setIsPf(false);
       setIsEsic(false);
       setTdsNumber('');
       setProfessionalNumber('');
       setEpfNumber('');
-      setPfNumber('');
       setEsicNumber('');
       setErrors({});
     } catch (error) {
@@ -597,7 +586,7 @@ export default function CreateCompanyModal({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Professional
+                  Professional Tax
                 </label>
                 <button
                   type="button"
@@ -704,64 +693,6 @@ export default function CreateCompanyModal({
                   />
                   {errors.epfNumber && (
                     <p className="mt-1 text-sm text-red-600">{errors.epfNumber}</p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* PF Toggle */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  PF
-                </label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsPf(!isPf);
-                    if (isPf) {
-                      setPfNumber('');
-                      setErrors(prev => {
-                        const newErrors = { ...prev };
-                        delete newErrors.pfNumber;
-                        return newErrors;
-                      });
-                    }
-                  }}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    isPf ? 'bg-green-600' : 'bg-gray-300'
-                  }`}
-                  disabled={loading}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      isPf ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-              {isPf && (
-                <div className="mt-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    PF Number *
-                  </label>
-                  <input
-                    type="text"
-                    value={pfNumber}
-                    onChange={(e) => {
-                      setPfNumber(e.target.value);
-                      if (errors.pfNumber) {
-                        setErrors(prev => ({ ...prev, pfNumber: '' }));
-                      }
-                    }}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.pfNumber ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter PF Number"
-                    disabled={loading}
-                  />
-                  {errors.pfNumber && (
-                    <p className="mt-1 text-sm text-red-600">{errors.pfNumber}</p>
                   )}
                 </div>
               )}
