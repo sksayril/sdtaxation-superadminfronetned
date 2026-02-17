@@ -586,7 +586,7 @@ export default function CreateCompanyModal({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Professional Tax
+                  Professional
                 </label>
                 <button
                   type="button"

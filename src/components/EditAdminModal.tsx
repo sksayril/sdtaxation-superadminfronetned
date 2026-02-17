@@ -310,16 +310,31 @@ export default function EditAdminModal({
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
                   <Shield className="inline mr-2" size={16} />
+                  Role *
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value="Admin"
+                    readOnly
+                    disabled
+                    className="w-full px-4 py-3 border-2 rounded-xl bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  <Shield className="inline mr-2" size={16} />
                   Department *
                 </label>
                 <div className="relative">
                   <select
                     value={formData.department || ''}
                     onChange={(e) => {
-                      const deptValue = e.target.value;
-                      handleInputChange('department', deptValue);
-                      // Also set role to the same value
-                      handleInputChange('role', deptValue);
+                      handleInputChange('department', e.target.value);
+                      // Keep role as Admin only
+                      handleInputChange('role', 'Admin');
                     }}
                     className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 hover:border-gray-300 appearance-none bg-white cursor-pointer ${
                       errors.department ? 'border-red-400 bg-red-50' : 'border-gray-200'
@@ -447,12 +462,23 @@ export default function EditAdminModal({
                         key={permission}
                         className="flex items-center space-x-2 p-2 bg-white rounded-lg border-2 border-gray-200 hover:border-blue-300 cursor-pointer transition-all"
                       >
-                        <input
-                          type="checkbox"
-                          checked={formData.permissions![module][permission]}
-                          onChange={(e) => handlePermissionChange(module, permission, e.target.checked)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                        />
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            checked={formData.permissions![module][permission]}
+                            onChange={(e) => handlePermissionChange(module, permission, e.target.checked)}
+                            className="sr-only"
+                          />
+                          <div className={`w-4 h-4 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${
+                            formData.permissions![module][permission]
+                              ? 'bg-blue-600 border-blue-600'
+                              : 'bg-white border-gray-300'
+                          }`}>
+                            {formData.permissions![module][permission] && (
+                              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                        </div>
                         <span className="text-xs font-medium text-gray-700 capitalize">
                           {permission === 'create' ? 'Create' : 
                            permission === 'read' ? 'Read' : 

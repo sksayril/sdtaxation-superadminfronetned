@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { apiService, type Company } from '../services/api';
 import { toast } from '../utils/toast';
-import { Building2, Mail, Phone, MapPin, Globe, Calendar, User, FileText, Briefcase, Receipt, Shield, Award, Users, CreditCard, Building, ArrowLeft, Loader2, Edit } from 'lucide-react';
+import { Building2, Mail, Phone, MapPin, Globe, Calendar, User, FileText, Briefcase, Receipt, Shield, Award, Users, Building, ArrowLeft, Loader2, Edit } from 'lucide-react';
 
 export default function CompanyDetails() {
   const { id } = useParams<{ id: string }>();
@@ -115,6 +115,14 @@ export default function CompanyDetails() {
                   </label>
                   <p className="text-gray-900 dark:text-white font-medium text-lg">{company.company_name}</p>
                 </div>
+                {company.company_id && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Client ID
+                    </label>
+                    <p className="text-gray-900 dark:text-white font-medium font-mono">{company.company_id}</p>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Status
@@ -239,7 +247,7 @@ export default function CompanyDetails() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
                     <Award className="mr-1" size={14} />
-                    Professional
+                    Professional Tax
                   </label>
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                     company.professional 
@@ -293,36 +301,6 @@ export default function CompanyDetails() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
                       <Users className="mr-1" size={14} />
                       EPF Number
-                    </label>
-                    <p className="text-gray-500 dark:text-gray-400 italic">Not applicable</p>
-                  </div>
-                )}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-                    <CreditCard className="mr-1" size={14} />
-                    PF
-                  </label>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                    company.pf 
-                      ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
-                  }`}>
-                    {company.pf ? 'Yes' : 'No'}
-                  </span>
-                </div>
-                {company.pf && company.pfNumber ? (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-                      <CreditCard className="mr-1" size={14} />
-                      PF Number
-                    </label>
-                    <p className="text-gray-900 dark:text-white font-medium">{company.pfNumber}</p>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-                      <CreditCard className="mr-1" size={14} />
-                      PF Number
                     </label>
                     <p className="text-gray-500 dark:text-gray-400 italic">Not applicable</p>
                   </div>

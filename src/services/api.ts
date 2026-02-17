@@ -1,6 +1,6 @@
 // API Configuration and Service
-const API_BASE_URL = 'https://api.sdtaxation.com';
-// const API_BASE_URL = 'https://7cvccltb-3001.inc1.devtunnels.ms';
+// const API_BASE_URL = 'https://api.sdtaxation.com';
+const API_BASE_URL = 'https://7cvccltb-3001.inc1.devtunnels.ms';
 
 // Types for API responses
 export interface LoginRequest {
@@ -60,6 +60,7 @@ export interface CreateCompanyRequest {
 
 export interface Company {
   _id: string;
+  company_id?: string;
   company_name: string;
   company_email: string;
   company_phone: string;
@@ -232,6 +233,66 @@ export interface AdminsResponse {
   success: boolean;
   message: string;
   data: Admin[];
+}
+
+// Department related types
+export interface Department {
+  _id: string;
+  department_name: string;
+  description?: string;
+  status: string;
+  created_by: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateDepartmentRequest {
+  department_name: string;
+  description?: string;
+  status?: 'active' | 'inactive';
+}
+
+export interface UpdateDepartmentRequest {
+  department_name?: string;
+  description?: string;
+  status?: 'active' | 'inactive';
+}
+
+export interface CreateDepartmentResponse {
+  success: boolean;
+  message: string;
+  data: Department;
+}
+
+export interface UpdateDepartmentResponse {
+  success: boolean;
+  message: string;
+  data: Department;
+}
+
+export interface DeleteDepartmentResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    _id: string;
+    department_name: string;
+  };
+}
+
+export interface DepartmentsResponse {
+  success: boolean;
+  message: string;
+  data: Department[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
 }
 
 export interface UpdateAdminRequest {
@@ -649,6 +710,45 @@ class ApiService {
   async deleteAdmin(adminId: string): Promise<DeleteAdminResponse> {
     return this.request<DeleteAdminResponse>(`/api/superadmin/delete-admin/${adminId}`, {
       method: 'POST',
+    });
+  }
+
+  // Department endpoints
+  async createDepartment(departmentData: CreateDepartmentRequest): Promise<CreateDepartmentResponse> {
+    return this.request<CreateDepartmentResponse>('/api/superadmin/departments/create', {
+      method: 'POST',
+      body: JSON.stringify(departmentData),
+    });
+  }
+
+  async getDepartments(params?: {
+    status?: 'active' | 'inactive';
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<DepartmentsResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const url = `/api/superadmin/departments${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.request<DepartmentsResponse>(url, {
+      method: 'GET',
+    });
+  }
+
+  async updateDepartment(departmentId: string, departmentData: UpdateDepartmentRequest): Promise<UpdateDepartmentResponse> {
+    return this.request<UpdateDepartmentResponse>(`/api/superadmin/departments/${departmentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(departmentData),
+    });
+  }
+
+  async deleteDepartment(departmentId: string): Promise<DeleteDepartmentResponse> {
+    return this.request<DeleteDepartmentResponse>(`/api/superadmin/departments/${departmentId}`, {
+      method: 'DELETE',
     });
   }
 

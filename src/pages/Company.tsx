@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import CreateCompanyModal from '../components/CreateCompanyModal';
 import DeleteCompanyModal from '../components/DeleteCompanyModal';
+import CompanyDetailsModal from '../components/CompanyDetailsModal';
+import EditCompanyModal from '../components/EditCompanyModal';
 import SkeletonLoader, { LoadingSpinner } from '../components/SkeletonLoader';
-import { apiService, type Company, type CreateCompanyRequest } from '../services/api';
+import { apiService, type Company, type CreateCompanyRequest, type UpdateCompanyRequest } from '../services/api';
 import { toast } from '../utils/toast';
 import { Building2, Plus, Search, Edit, Trash2, RefreshCw, Eye } from 'lucide-react';
 
 export default function Company() {
-  const navigate = useNavigate();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -19,6 +19,12 @@ export default function Company() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingCompany, setDeletingCompany] = useState<Company | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingCompany, setEditingCompany] = useState<Company | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   // Format date as "11-02-2026" (day-month-year with dashes)
   const formatDate = (dateString: string) => {
@@ -186,14 +192,93 @@ export default function Company() {
     }
   };
 
-  // Handle view company details - navigate to details page
-  const handleViewCompany = (companyId: string) => {
-    navigate(`/company/${companyId}`);
+  // Handle view company details - open modal
+  const handleViewCompany = async (companyId: string) => {
+    try {
+      setDetailsLoading(true);
+      setDetailsModalOpen(true);
+      setSelectedCompany(null); // Clear previous data
+      
+      const response = await apiService.getCompanyById(companyId);
+      if (response.success) {
+        setSelectedCompany(response.data);
+      } else {
+        toast.error(
+          response.message || 'Failed to fetch company details',
+          '❌ Fetch Error'
+        );
+        setDetailsModalOpen(false);
+      }
+    } catch (error: any) {
+      console.error('Error fetching company details:', error);
+      toast.error(
+        'Failed to fetch company details. Please try again.',
+        '❌ Network Error'
+      );
+      setDetailsModalOpen(false);
+    } finally {
+      setDetailsLoading(false);
+    }
   };
 
-  // Handle edit company - navigate to edit page
-  const handleEditCompany = (companyId: string) => {
-    navigate(`/company/${companyId}/edit`);
+  // Handle edit company - open modal
+  const handleEditCompany = async (companyId: string) => {
+    try {
+      setEditLoading(true);
+      setEditModalOpen(true);
+      setEditingCompany(null); // Clear previous data
+      
+      const response = await apiService.getCompanyById(companyId);
+      if (response.success) {
+        setEditingCompany(response.data);
+      } else {
+        toast.error(
+          response.message || 'Failed to fetch company details',
+          '❌ Fetch Error'
+        );
+        setEditModalOpen(false);
+      }
+    } catch (error: any) {
+      console.error('Error fetching company details:', error);
+      toast.error(
+        'Failed to fetch company details. Please try again.',
+        '❌ Network Error'
+      );
+      setEditModalOpen(false);
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  // Handle update company
+  const handleUpdateCompany = async (companyId: string, companyData: UpdateCompanyRequest) => {
+    try {
+      setEditLoading(true);
+      const response = await apiService.updateCompany(companyId, companyData);
+      if (response.success) {
+        toast.success(
+          'Company updated successfully!',
+          '✅ Update Success'
+        );
+        setEditModalOpen(false);
+        setEditingCompany(null);
+        // Refresh the companies list
+        await fetchCompanies();
+      } else {
+        toast.error(
+          response.message || 'Failed to update company',
+          '❌ Update Failed'
+        );
+      }
+    } catch (error: any) {
+      console.error('Error updating company:', error);
+      toast.error(
+        'Failed to update company. Please try again.',
+        '❌ Network Error'
+      );
+    } finally {
+      setEditLoading(false);
+    }
   };
 
 
@@ -375,6 +460,12 @@ export default function Company() {
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      SL No
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Client ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Company Name
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -395,8 +486,18 @@ export default function Company() {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredCompanies.map((company) => (
+                  {filteredCompanies.map((company, index) => (
                     <tr key={company._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-bold text-gray-900 dark:text-white text-center">
+                          {index + 1}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-white font-mono">
+                          {company.company_id || company._id}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
@@ -512,6 +613,29 @@ export default function Company() {
           onConfirm={handleDeleteCompany}
           company={deletingCompany}
           loading={deleteLoading}
+        />
+
+        {/* Company Details Modal */}
+        <CompanyDetailsModal
+          isOpen={detailsModalOpen}
+          onClose={() => {
+            setDetailsModalOpen(false);
+            setSelectedCompany(null);
+          }}
+          company={selectedCompany}
+          loading={detailsLoading}
+        />
+
+        {/* Edit Company Modal */}
+        <EditCompanyModal
+          isOpen={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false);
+            setEditingCompany(null);
+          }}
+          onSubmit={handleUpdateCompany}
+          company={editingCompany}
+          loading={editLoading}
         />
       </div>
     </Layout>

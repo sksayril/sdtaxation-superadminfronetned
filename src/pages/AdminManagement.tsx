@@ -376,6 +376,9 @@ export default function AdminManagement() {
                 <thead className="bg-gradient-to-r from-purple-50 to-purple-100">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">
+                      SL No
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">
                       Admin Details
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">
@@ -399,8 +402,13 @@ export default function AdminManagement() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
-                  {filteredAdmins.map((admin) => (
+                  {filteredAdmins.map((admin, index) => (
                     <tr key={admin._id} className="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200 group">
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="text-sm font-bold text-gray-900 text-center">
+                          {index + 1}
+                        </div>
+                      </td>
                       <td className="px-6 py-5 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-12 w-12">

@@ -64,17 +64,17 @@ export default function Layout({ children, title }: LayoutProps) {
     // }
     
     const activeClassMap: Record<string, string> = {
-      blue: 'bg-white text-blue-600 rounded-lg',
-      purple: 'bg-white text-purple-600 rounded-lg',
-      green: 'bg-white text-green-600 rounded-lg',
-      orange: 'bg-white text-orange-600 rounded-lg',
-      red: 'bg-white text-red-600 rounded-lg',
-      indigo: 'bg-white text-indigo-600 rounded-lg',
-      black: 'bg-white text-gray-900 rounded-lg',
-      pink: 'bg-white text-pink-600 rounded-lg',
-      teal: 'bg-white text-teal-600 rounded-lg',
-      cyan: 'bg-white text-cyan-600 rounded-lg',
-      white: 'bg-gray-100 text-gray-900 rounded-lg',
+      blue: 'bg-white text-blue-600 rounded-lg border-2 border-black',
+      purple: 'bg-white text-purple-600 rounded-lg border-2 border-black',
+      green: 'bg-white text-green-600 rounded-lg border-2 border-black',
+      orange: 'bg-white text-orange-600 rounded-lg border-2 border-black',
+      red: 'bg-white text-red-600 rounded-lg border-2 border-black',
+      indigo: 'bg-white text-indigo-600 rounded-lg border-2 border-black',
+      black: 'bg-white text-gray-900 rounded-lg border-2 border-black',
+      pink: 'bg-white text-pink-600 rounded-lg border-2 border-black',
+      teal: 'bg-white text-teal-600 rounded-lg border-2 border-black',
+      cyan: 'bg-white text-cyan-600 rounded-lg border-2 border-black',
+      white: 'bg-gray-100 text-gray-900 rounded-lg border-2 border-black',
     };
     
     return activeClassMap[theme.name] || activeClassMap.blue;

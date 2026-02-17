@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, UserCheck, Mail, Phone, MapPin, Building2, Loader2, Eye, EyeOff, User, Shield, Briefcase, Lock } from 'lucide-react';
-import { CreateAdminRequest, Company, AdminPermissions, ModulePermissions } from '../services/api';
+import { X, UserCheck, Mail, Phone, MapPin, Building2, Loader2, Eye, EyeOff, User, Shield, Briefcase, Lock, Plus } from 'lucide-react';
+import { CreateAdminRequest, Company, AdminPermissions, ModulePermissions, Department } from '../services/api';
+import CreateDepartmentModal from './CreateDepartmentModal';
+import { apiService } from '../services/api';
 
 interface CreateAdminModalProps {
   isOpen: boolean;
@@ -32,7 +34,7 @@ export default function CreateAdminModal({
     password: '',
     originalPassword: '',
     phone: '',
-    department: '',
+    department: 'Admin',
     adminArea: '',
     company: companies.length > 0 ? companies[0]._id : '',
     permissions: defaultPermissions
@@ -40,6 +42,31 @@ export default function CreateAdminModal({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [departmentsLoading, setDepartmentsLoading] = useState(false);
+  const [createDepartmentModalOpen, setCreateDepartmentModalOpen] = useState(false);
+
+  // Fetch departments when modal opens
+  const fetchDepartments = async () => {
+    try {
+      setDepartmentsLoading(true);
+      const response = await apiService.getDepartments({ status: 'active' });
+      if (response.success) {
+        setDepartments(response.data);
+        // Set default department to "Admin" if available
+        if (response.data.length > 0) {
+          const adminDept = response.data.find(d => d.department_name === 'Admin');
+          if (adminDept && !formData.department) {
+            setFormData(prev => ({ ...prev, department: adminDept._id }));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    } finally {
+      setDepartmentsLoading(false);
+    }
+  };
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -58,6 +85,7 @@ export default function CreateAdminModal({
         permissions: defaultPermissions
       });
       setErrors({});
+      fetchDepartments();
     }
   }, [isOpen, companies]);
 
@@ -360,35 +388,58 @@ export default function CreateAdminModal({
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
                   <Shield className="inline mr-2" size={16} />
-                  Department *
+                  Role *
                 </label>
                 <div className="relative">
-                  <select
-                    value={formData.department}
-                    onChange={(e) => {
-                      const deptValue = e.target.value;
-                      handleInputChange('department', deptValue);
-                      // Also set role to the same value
-                      handleInputChange('role', deptValue);
-                    }}
-                    className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 hover:border-gray-300 appearance-none bg-white cursor-pointer ${
-                      errors.department ? 'border-red-400 bg-red-50' : 'border-gray-200'
-                    }`}
-                    disabled={loading}
-                  >
-                    <option value="">Select Department</option>
-                    <option value="Admin">Admin</option>
-                    <option value="HR">HR</option>
-                    <option value="HR Manager">HR Manager</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Supervisor">Supervisor</option>
-                    <option value="Finance">Finance</option>
-                    <option value="Accountant">Accountant</option>
-                    <option value="Executive">Executive</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <div className="w-2 h-2 border-r-2 border-b-2 border-gray-400 transform rotate-45"></div>
+                  <input
+                    type="text"
+                    value="Admin"
+                    readOnly
+                    disabled
+                    className="w-full px-4 py-3 border-2 rounded-xl bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  <Shield className="inline mr-2" size={16} />
+                  Department *
+                </label>
+                <div className="flex items-center space-x-2">
+                  <div className="relative flex-1">
+                    <select
+                      value={formData.department}
+                      onChange={(e) => {
+                        handleInputChange('department', e.target.value);
+                        // Keep role as Admin only
+                        handleInputChange('role', 'Admin');
+                      }}
+                      className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 hover:border-gray-300 appearance-none bg-white cursor-pointer ${
+                        errors.department ? 'border-red-400 bg-red-50' : 'border-gray-200'
+                      }`}
+                      disabled={loading || departmentsLoading}
+                    >
+                      <option value="">{departmentsLoading ? 'Loading departments...' : 'Select Department'}</option>
+                      {departments.map((dept) => (
+                        <option key={dept._id} value={dept._id}>
+                          {dept.department_name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <div className="w-2 h-2 border-r-2 border-b-2 border-gray-400 transform rotate-45"></div>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setCreateDepartmentModalOpen(true)}
+                    className="p-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors focus:outline-none focus:ring-4 focus:ring-purple-100 flex items-center justify-center"
+                    disabled={loading || departmentsLoading}
+                    title="Create New Department"
+                  >
+                    <Plus size={20} />
+                  </button>
                 </div>
                 {errors.department && (
                   <p className="text-red-500 text-sm mt-2 flex items-center">
@@ -497,12 +548,23 @@ export default function CreateAdminModal({
                         key={permission}
                         className="flex items-center space-x-3 p-3 bg-white rounded-lg border-2 border-gray-200 hover:border-purple-300 cursor-pointer transition-all"
                       >
-                        <input
-                          type="checkbox"
-                          checked={formData.permissions![module][permission]}
-                          onChange={(e) => handlePermissionChange(module, permission, e.target.checked)}
-                          className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
-                        />
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            checked={formData.permissions![module][permission]}
+                            onChange={(e) => handlePermissionChange(module, permission, e.target.checked)}
+                            className="sr-only"
+                          />
+                          <div className={`w-5 h-5 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${
+                            formData.permissions![module][permission]
+                              ? 'bg-purple-600 border-purple-600'
+                              : 'bg-white border-gray-300'
+                          }`}>
+                            {formData.permissions![module][permission] && (
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                        </div>
                         <span className="text-sm font-medium text-gray-700 capitalize">
                           {permission === 'create' ? 'Create' : 
                            permission === 'read' ? 'Read' : 
@@ -545,6 +607,16 @@ export default function CreateAdminModal({
             </button>
           </div>
         </form>
+
+        {/* Create Department Modal */}
+        <CreateDepartmentModal
+          isOpen={createDepartmentModalOpen}
+          onClose={() => setCreateDepartmentModalOpen(false)}
+          onSuccess={() => {
+            fetchDepartments();
+          }}
+          loading={loading}
+        />
       </div>
     </div>
   );

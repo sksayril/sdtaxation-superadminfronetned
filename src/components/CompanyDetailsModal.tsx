@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { X, Building2, Mail, Phone, MapPin, Globe, Calendar, User, Loader2, FileText, Briefcase, Receipt, Shield, Award, Users, CreditCard, Building } from 'lucide-react';
+import { X, Building2, Mail, Phone, MapPin, Globe, Calendar, User, Loader2, FileText, Briefcase, Receipt, Shield, Award, Users, Building } from 'lucide-react';
 import { Company } from '../services/api';
 
 interface CompanyDetailsModalProps {
@@ -95,6 +95,14 @@ export default function CompanyDetailsModal({
                     </label>
                     <p className="text-gray-900 dark:text-white font-medium">{company.company_name}</p>
                   </div>
+                  {company.company_id && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Client ID
+                      </label>
+                      <p className="text-gray-900 dark:text-white font-medium font-mono">{company.company_id}</p>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Status
@@ -208,7 +216,7 @@ export default function CompanyDetailsModal({
               </div>
 
               {/* Professional & Compliance Information */}
-              {(company.professional || company.epf || company.pf || company.esic) && (
+              {(company.professional || company.epf || company.esic) && (
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                     <Shield className="mr-2" size={20} />
@@ -218,7 +226,7 @@ export default function CompanyDetailsModal({
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
                         <Award className="mr-1" size={14} />
-                        Professional
+                        Professional Tax
                       </label>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         company.professional 
@@ -257,28 +265,6 @@ export default function CompanyDetailsModal({
                           EPF Number
                         </label>
                         <p className="text-gray-900 dark:text-white font-medium">{company.epfNumber}</p>
-                      </div>
-                    )}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-                        <CreditCard className="mr-1" size={14} />
-                        PF
-                      </label>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        company.pf 
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {company.pf ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-                    {company.pf && company.pfNumber && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-                          <CreditCard className="mr-1" size={14} />
-                          PF Number
-                        </label>
-                        <p className="text-gray-900 dark:text-white font-medium">{company.pfNumber}</p>
                       </div>
                     )}
                     <div>
