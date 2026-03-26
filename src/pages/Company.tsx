@@ -10,6 +10,8 @@ import { toast } from '../utils/toast';
 import { Building2, Plus, Search, Edit, Trash2, RefreshCw, Eye } from 'lucide-react';
 
 export default function Company() {
+  const isValidObjectId = (id: string) => /^[a-fA-F0-9]{24}$/.test(id);
+
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -285,6 +287,11 @@ export default function Company() {
   // Handle delete company
   const handleDeleteCompany = async (companyId: string) => {
     try {
+      if (!isValidObjectId(companyId)) {
+        toast.error('Invalid company ID format', '❌ Delete Failed');
+        return;
+      }
+
       setDeleteLoading(true);
       const response = await apiService.deleteCompany(companyId);
       if (response.success) {
@@ -303,8 +310,9 @@ export default function Company() {
       }
     } catch (error: any) {
       console.error('Error deleting company:', error);
+      const errorMessage = error?.message || error?.error || 'Failed to delete company. Please try again.';
       toast.error(
-        'Failed to delete company. Please try again.',
+        errorMessage,
         '❌ Network Error'
       );
     } finally {
@@ -312,37 +320,15 @@ export default function Company() {
     }
   };
 
-  // Handle delete button click
-  const handleDeleteClick = async (companyId: string) => {
-    try {
-      setDeleteLoading(true);
-      setDeleteModalOpen(true);
-      setDeletingCompany(null); // Clear previous data
-      
-      const response = await apiService.getCompanyById(companyId);
-      if (response.success) {
-        setDeletingCompany(response.data);
-        toast.warning(
-          'Please confirm company deletion',
-          '⚠️ Delete Confirmation'
-        );
-      } else {
-        toast.error(
-          'Failed to fetch company data for deletion',
-          '❌ Fetch Error'
-        );
-        setDeleteModalOpen(false);
-      }
-    } catch (error: any) {
-      console.error('Error fetching company for deletion:', error);
-      toast.error(
-        'Failed to fetch company data. Please try again.',
-        '❌ Network Error'
-      );
-      setDeleteModalOpen(false);
-    } finally {
-      setDeleteLoading(false);
+  // Handle delete button click - open confirmation modal first
+  const handleDeleteClick = (company: Company) => {
+    if (!isValidObjectId(company._id)) {
+      toast.error('Invalid company ID format', '❌ Delete Failed');
+      return;
     }
+
+    setDeletingCompany(company);
+    setDeleteModalOpen(true);
   };
 
   // Filter companies based on search (status filtering is done via API)
@@ -582,7 +568,7 @@ export default function Company() {
                             <Edit size={18} />
                           </button>
                           <button 
-                            onClick={() => handleDeleteClick(company._id)}
+                            onClick={() => handleDeleteClick(company)}
                             className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title="Delete Company"
                           >
@@ -609,7 +595,10 @@ export default function Company() {
         {/* Delete Company Modal */}
         <DeleteCompanyModal
           isOpen={deleteModalOpen}
-          onClose={() => setDeleteModalOpen(false)}
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setDeletingCompany(null);
+          }}
           onConfirm={handleDeleteCompany}
           company={deletingCompany}
           loading={deleteLoading}

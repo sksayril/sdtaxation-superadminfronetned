@@ -5,7 +5,7 @@ import EditCompanySubscriptionModal from '../components/EditCompanySubscriptionM
 import DeleteCompanySubscriptionModal from '../components/DeleteCompanySubscriptionModal';
 import { apiService, type CompanySubscription, type Company, type SubscriptionPlan, type AssignSubscriptionRequest, type UpdateSubscriptionRequest } from '../services/api';
 import { toast } from '../utils/toast';
-import { CreditCard, Plus, Search, RefreshCw, Building2, Package, Calendar, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
+import { CreditCard, Plus, Search, RefreshCw, Building2, Package, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
 
 export default function CompanySubscriptions() {
   const [subscriptions, setSubscriptions] = useState<CompanySubscription[]>([]);
@@ -326,9 +326,9 @@ export default function CompanySubscriptions() {
                           <Package className="h-5 w-5 text-gray-400 mr-2" />
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {subscription.plan.planName}
+                              {subscription.plan?.planName || 'N/A'}
                             </div>
-                            {subscription.plan.price && (
+                            {typeof subscription.plan?.price === 'number' && (
                               <div className="text-sm text-gray-500">
                                 ₹{subscription.plan.price.toLocaleString()}
                               </div>
